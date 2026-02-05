@@ -51,11 +51,8 @@ class RegisterOtpControllers extends GetxController {
         print("================================ $userId");
 
         EasyLoading.showSuccess("Login verified successfully");
-        if (Platform.isIOS) {
-          Get.offAll(() => BottomNavbarUser());
-        } else {
-          Get.offAll(() => LocationScreen());
-        }
+
+        Get.offAll(() => LocationScreen());
       } else {
         EasyLoading.showError(response.errorMessage ?? "Failed to resend OTP");
       }
