@@ -8,7 +8,6 @@ import '../../../../core/global_widegts/custom_button.dart';
 import '../../../../core/style/global_text_style.dart';
 import '../controller/register_otp_controller.dart';
 
-
 class RegisterOtpVerify extends StatefulWidget {
   final String driverPhoneNo;
   RegisterOtpVerify({super.key, required this.driverPhoneNo});
@@ -193,7 +192,7 @@ class _ForgetPassOtpVerifyState extends State<RegisterOtpVerify> {
               ),
               SizedBox(height: 20),
               CustomButton(
-                title: "Resend OTP",
+                title: "Verify OTP",
                 backgroundColor: Color(0xFFFFDC71),
                 borderColor: Colors.transparent,
                 onPress: () {
