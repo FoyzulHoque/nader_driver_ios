@@ -9,13 +9,13 @@ class OfflineRideCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     String formattedTime = "";
     try {
       DateTime pickupDateTime = DateTime.parse(ride.pickupTime);
       formattedTime = DateFormat("hh:mm a").format(pickupDateTime);
     } catch (e) {
-      formattedTime = ride.pickupTime; // Use the original pickup time if parsing fails
+      formattedTime =
+          ride.pickupTime; // Use the original pickup time if parsing fails
     }
 
     return Container(
@@ -48,10 +48,7 @@ class OfflineRideCard extends StatelessWidget {
               ),
               Text(
                 _formatTime(ride.pickupTime),
-                style: const TextStyle(
-                  color: Colors.black54,
-                  fontSize: 18,
-                ),
+                style: const TextStyle(color: Colors.black54, fontSize: 18),
               ),
             ],
           ),
@@ -112,6 +109,7 @@ class OfflineRideCard extends StatelessWidget {
       ),
     );
   }
+
   // Helper function for formatting "14:45" → "02:45 PM"
   String _formatTime(String timeString) {
     try {

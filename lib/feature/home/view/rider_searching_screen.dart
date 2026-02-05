@@ -101,7 +101,7 @@ class RiderSearchingScreen extends StatelessWidget {
                 } else if (riderSearchingController.isOnline.value == false) {
                   return OfflineRideListScreen();
                 } else {
-                  return NoData(); // default / null case
+                  return const NoData();
                 }
               }),
             ),
