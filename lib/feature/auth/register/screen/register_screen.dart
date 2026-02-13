@@ -161,42 +161,42 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 20),
 
               /// Or separator
-              Align(
-                alignment: Alignment.center,
-                child: SizedBox(
-                  height: 24,
-                  width: 327,
-                  child: Row(
-                    children: [
-                      Container(
-                        height: 1,
-                        width: 144,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFEDEDF3),
-                        ),
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        "Or",
-                        style: globalTextStyle(
-                          fontSize: 14,
-                          color: const Color(0xFF8697AC),
-                        ),
-                      ),
-                      const SizedBox(width: 5),
-                      Container(
-                        height: 1,
-                        width: 144,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFEDEDF3),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              // Align(
+              //   alignment: Alignment.center,
+              //   child: SizedBox(
+              //     height: 24,
+              //     width: 327,
+              //     child: Row(
+              //       children: [
+              //         Container(
+              //           height: 1,
+              //           width: 144,
+              //           decoration: const BoxDecoration(
+              //             color: Color(0xFFEDEDF3),
+              //           ),
+              //         ),
+              //         const SizedBox(width: 5),
+              //         Text(
+              //           "Or",
+              //           style: globalTextStyle(
+              //             fontSize: 14,
+              //             color: const Color(0xFF8697AC),
+              //           ),
+              //         ),
+              //         const SizedBox(width: 5),
+              //         Container(
+              //           height: 1,
+              //           width: 144,
+              //           decoration: const BoxDecoration(
+              //             color: Color(0xFFEDEDF3),
+              //           ),
+              //         ),
+              //       ],
+              //     ),
+              //   ),
+              // ),
 
-              const SizedBox(height: 20),
+              // const SizedBox(height: 20),
 
               /// Google button
               /* GestureDetector(
