@@ -51,20 +51,20 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDuwMUxjypi1_Fzx7sbHsLjbOK4-SZv4z4',
-    appId: '1:283905417668:android:816f7bc2e29c93b88e0491',
-    messagingSenderId: '283905417668',
-    projectId: 'nader_driver-b9589',
-    storageBucket: 'nader_driver-b9589.firebasestorage.app',
+    apiKey: 'AIzaSyBfy3mDMpZ0IdgzKPfd0HCZBadRh88jKyE',
+    appId: '1:399511821795:android:19b0438c054e596d3d14d6',
+    messagingSenderId: '399511821795',
+    projectId: 'brothers-taxi',
+    storageBucket: 'brothers-taxi.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCUQokP98SSvqCGAo_e15ppfvWQ2QhByqs',
-    appId: '1:283905417668:ios:d1ed7b8ed2c66bfd8e0491',
-    messagingSenderId: '283905417668',
-    projectId: 'nader_driver-b9589',
-    storageBucket: 'nader_driver-b9589.firebasestorage.app',
-    iosBundleId: 'com.example.nader_driver',
+    apiKey: 'AIzaSyBNdC6pYKbRzJMwjZTBYqERi2vsdsghEOM',
+    appId: '1:399511821795:ios:deece7a79a8446213d14d6',
+    messagingSenderId: '399511821795',
+    projectId: 'brothers-taxi',
+    storageBucket: 'brothers-taxi.firebasestorage.app',
+    iosBundleId: 'com.brothertaxi.driver',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(

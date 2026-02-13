@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "399511821795",
+    "project_id": "brothers-taxi",
+    "storage_bucket": "brothers-taxi.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:399511821795:android:19b0438c054e596d3d14d6",
+        "android_client_info": {
+          "package_name": "com.brotherstaxisdrivers.apppss"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBfy3mDMpZ0IdgzKPfd0HCZBadRh88jKyE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
