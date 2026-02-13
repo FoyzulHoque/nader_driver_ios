@@ -63,6 +63,8 @@ class RegisterController extends GetxController {
   }
 }
 */
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
@@ -90,7 +92,20 @@ class RegisterController extends GetxController {
     EasyLoading.show(status: "Registering...");
 
     try {
-      Map<String, dynamic> mapBody = {"phoneNumber": phoneNumber, "role": role};
+      // Get FCM token
+      String? fcmToken = await FirebaseMessaging.instance.getToken();
+      String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+      String? fToken = fcmToken ?? apnsToken;
+      if (fToken != null) {
+        debugPrint("✅ FCM/APNS Token: $fToken");
+      } else {
+        debugPrint("⚠️ Token is null");
+      }
+      Map<String, dynamic> mapBody = {
+        "phoneNumber": phoneNumber,
+        "role": role,
+        "fcmToken": fToken ?? "",
+      };
 
       NetworkResponse response = await NetworkCall.postRequest(
         url: NetworkPath.registration,

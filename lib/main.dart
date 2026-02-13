@@ -3,6 +3,8 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:nader_driver/in_app_notification.dart'
+    show InAppNotificationController;
 import 'package:nader_driver/route/route.dart';
 import 'feature/chat/controller/chat_controller.dart';
 import 'feature/home/controller/driver_confirmation_controller.dart';
@@ -17,6 +19,7 @@ void main() async {
   configEasyLoading();
 
   // Initialize controllers
+  Get.put(InAppNotificationController());
   Get.put(OnlineRideController());
   Get.put(RiderInfoApiController());
   Get.put(DriverConfirmationController());
@@ -35,7 +38,7 @@ class MyApp extends StatelessWidget {
       splitScreenMode: true,
       builder: (context, child) {
         return GetMaterialApp(
-          title: 'Flutter Demo',
+          title: 'Brothers Taxi Driver',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),

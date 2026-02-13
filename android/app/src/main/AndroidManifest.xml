@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.CAMERA"/>
 
     <application
-        android:label="Brother Taxi"
+        android:label="Brother Taxi Drivers"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
