@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 
 import '../../../core/global_widegts/custom_button.dart';
 import '../controller/profile_controller.dart';
-import '../widget/profile_edit_image.dart';
 import '../widget/license_image_widget.dart';
 
 // class ProfileEditScreen extends StatelessWidget {

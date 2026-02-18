@@ -773,7 +773,7 @@ class DriverConfirmationController extends GetxController {
     final hours = totalDistance / 30.0;
     final minutes = (hours * 60).ceil();
 
-    return '${minutes} mins';
+    return '$minutes mins';
   }
 
   // Existing methods for API route fetching
@@ -840,7 +840,7 @@ class DriverConfirmationController extends GetxController {
       }
     } catch (e) {
       print('❌ Network Error: $e');
-      throw e;
+      rethrow;
     }
 
     return [];
@@ -971,7 +971,7 @@ class DriverConfirmationController extends GetxController {
       }
 
       print('🔄 Connecting WebSocket...');
-      channel.value = WebSocketChannel.connect(Uri.parse('${NetworkPath.ws}'));
+      channel.value = WebSocketChannel.connect(Uri.parse(NetworkPath.ws));
 
       // Authenticate
       channel.value!.sink.add(
@@ -998,8 +998,8 @@ class DriverConfirmationController extends GetxController {
 
       // Location updates - SIMPLIFIED
       _locationTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
-        if (isLocationTracking.value && driverRealTimePosition.value != null) {
-          _sendSimpleLocationUpdate(driverRealTimePosition.value!);
+        if (isLocationTracking.value) {
+          _sendSimpleLocationUpdate(driverRealTimePosition.value);
         }
       });
     } catch (e) {

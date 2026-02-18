@@ -10,10 +10,12 @@ class BottomSheetOne extends StatelessWidget {
   final OnlineRideModel data;
   BottomSheetOne({super.key, required this.data});
 
-  final DriverConfirmationController controller =
-  Get.put(DriverConfirmationController());
-  final AcceptAndDeclineController acceptAndDeclineController =
-  Get.put(AcceptAndDeclineController());
+  final DriverConfirmationController controller = Get.put(
+    DriverConfirmationController(),
+  );
+  final AcceptAndDeclineController acceptAndDeclineController = Get.put(
+    AcceptAndDeclineController(),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +88,9 @@ class BottomSheetOne extends StatelessWidget {
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 3),
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.yellow,
                               borderRadius: BorderRadius.circular(10),
@@ -94,7 +98,9 @@ class BottomSheetOne extends StatelessWidget {
                             child: const Text(
                               "New",
                               style: TextStyle(
-                                  fontSize: 12, fontWeight: FontWeight.bold),
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ],
@@ -106,8 +112,9 @@ class BottomSheetOne extends StatelessWidget {
                         children: [
                           CircleAvatar(
                             radius: 24,
-                            backgroundImage:
-                            NetworkImage("${data.user?.profileImage}"),
+                            backgroundImage: NetworkImage(
+                              "${data.user?.profileImage}",
+                            ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -125,7 +132,9 @@ class BottomSheetOne extends StatelessWidget {
                                 Text(
                                   "${_formatTime(data.pickupTime ?? '')} • ${(data.distance ?? 0.0).toStringAsFixed(2)} Km", // Handle nullable pickupTime
                                   style: const TextStyle(
-                                      fontSize: 13, color: Colors.grey),
+                                    fontSize: 13,
+                                    color: Colors.grey,
+                                  ),
                                 ),
                               ],
                             ),
@@ -135,9 +144,14 @@ class BottomSheetOne extends StatelessWidget {
                             style: TextStyle(fontSize: 13, color: Colors.grey),
                           ),
                           const SizedBox(width: 8),
-                          Text(CurrencyFormatter.format(data.totalAmount ?? 0.0), // Handle nullable totalAmount
+                          Text(
+                            CurrencyFormatter.format(
+                              data.totalAmount ?? 0.0,
+                            ), // Handle nullable totalAmount
                             style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
                         ],
                       ),
@@ -147,8 +161,7 @@ class BottomSheetOne extends StatelessWidget {
                         children: [
                           const Icon(Icons.person, size: 20),
                           const SizedBox(width: 8),
-                          Expanded(
-                              child: Text("${data.user?.fullName ?? "N/A"}")),
+                          Expanded(child: Text(data.user?.fullName ?? "N/A")),
                         ],
                       ),
                       const SizedBox(height: 10),
@@ -156,7 +169,13 @@ class BottomSheetOne extends StatelessWidget {
                         children: [
                           const Icon(Icons.location_on_outlined, size: 20),
                           const SizedBox(width: 8),
-                          Expanded(child: Text(data.pickupLocation?.isNotEmpty == true ? data.pickupLocation! : "Unknown Pickup Address")), // Handle nullable pickupLocation
+                          Expanded(
+                            child: Text(
+                              data.pickupLocation?.isNotEmpty == true
+                                  ? data.pickupLocation!
+                                  : "Unknown Pickup Address",
+                            ),
+                          ), // Handle nullable pickupLocation
                         ],
                       ),
                     ],
@@ -180,7 +199,8 @@ class BottomSheetOne extends StatelessWidget {
                         ),
                         onPressed: () {
                           acceptAndDeclineController.respondToRequest(
-                            carTransportId: data.id ?? 'unknown', // Handle nullable id
+                            carTransportId:
+                                data.id ?? 'unknown', // Handle nullable id
                             responseStatus: "DECLINED",
                           );
                           Get.back();
@@ -201,7 +221,8 @@ class BottomSheetOne extends StatelessWidget {
                         ),
                         onPressed: () {
                           acceptAndDeclineController.respondToRequest(
-                            carTransportId: data.id ?? 'unknown', // Handle nullable id
+                            carTransportId:
+                                data.id ?? 'unknown', // Handle nullable id
                             responseStatus: "ACCEPTED",
                           );
                           controller.changeSheet(2);

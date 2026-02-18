@@ -6,6 +6,8 @@ import 'package:nader_driver/feature/auth/register/screen/register_screen.dart';
 
 class OnboardingScreen extends StatelessWidget {
   final OnboardingControllers controller = Get.put(OnboardingControllers());
+
+  OnboardingScreen({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,6 +119,7 @@ class OnboardingPage extends StatelessWidget {
   final String? title3;
 
   const OnboardingPage({
+    super.key,
     required this.image,
     this.title1,
     this.title2,

@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:get/get.dart' hide Response;
 import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
-import 'package:http_parser/http_parser.dart';
 import 'package:logger/logger.dart';
 import '../../feature/auth/register/screen/register_screen.dart';
 import '../shared_preference/shared_preferences_helper.dart';
@@ -22,7 +21,6 @@ class NetworkResponse {
     this.successMessage = "Request success",
     required this.isSuccess,
   });
-
 }
 
 class NetworkCall {
@@ -175,7 +173,7 @@ class NetworkCall {
       if (response.statusCode == 200 || response.statusCode == 201) {
         return NetworkResponse(
           statusCode: response.statusCode,
-          successMessage:responseDecode["message"],
+          successMessage: responseDecode["message"],
           isSuccess: true,
           responseData: responseDecode,
         );
@@ -183,14 +181,14 @@ class NetworkCall {
         await _logOut();
         return NetworkResponse(
           statusCode: response.statusCode,
-          errorMessage:responseDecode["message"],
+          errorMessage: responseDecode["message"],
           isSuccess: false,
         );
       } else {
         return NetworkResponse(
           statusCode: response.statusCode,
           isSuccess: false,
-          errorMessage:responseDecode["message"],
+          errorMessage: responseDecode["message"],
         );
       }
     } catch (e) {
@@ -230,7 +228,7 @@ class NetworkCall {
       if (response.statusCode == 200 || response.statusCode == 201) {
         return NetworkResponse(
           statusCode: response.statusCode,
-          successMessage:responseDecode["message"],
+          successMessage: responseDecode["message"],
           isSuccess: true,
           responseData: responseDecode,
         );
@@ -238,14 +236,14 @@ class NetworkCall {
         await _logOut();
         return NetworkResponse(
           statusCode: response.statusCode,
-          errorMessage:responseDecode["message"],
+          errorMessage: responseDecode["message"],
           isSuccess: false,
         );
       } else {
         return NetworkResponse(
           statusCode: response.statusCode,
           isSuccess: false,
-          errorMessage:responseDecode["message"],
+          errorMessage: responseDecode["message"],
           responseData: jsonDecode(response.body),
         );
       }
@@ -312,7 +310,7 @@ class NetworkCall {
   /// GET request
   static Future<NetworkResponse> getRequest({
     required String url,
-    Map<String, dynamic>? queryParams
+    Map<String, dynamic>? queryParams,
   }) async {
     try {
       String fullUrl = url;
@@ -340,7 +338,7 @@ class NetworkCall {
       if (response.statusCode == 200 || response.statusCode == 201) {
         return NetworkResponse(
           statusCode: response.statusCode,
-          successMessage:responseDecode["message"],
+          successMessage: responseDecode["message"],
           isSuccess: true,
           responseData: responseDecode,
         );
@@ -348,13 +346,13 @@ class NetworkCall {
         await _logOut();
         return NetworkResponse(
           statusCode: response.statusCode,
-          errorMessage:responseDecode["message"],
+          errorMessage: responseDecode["message"],
           isSuccess: false,
         );
       } else {
         return NetworkResponse(
           statusCode: response.statusCode,
-          errorMessage:responseDecode["message"],
+          errorMessage: responseDecode["message"],
           isSuccess: false,
           responseData: jsonDecode(response.body),
         );

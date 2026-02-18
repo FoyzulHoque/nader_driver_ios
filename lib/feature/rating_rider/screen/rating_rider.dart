@@ -6,9 +6,9 @@ import '../../../core/style/global_text_style.dart';
 import '../controller/rating_rider_controller.dart';
 
 class RatingScreen extends StatelessWidget {
-  final RatingController controller = Get.put(
-    RatingController(),
-  ); // Initialize the controller
+  final RatingController controller = Get.put(RatingController());
+
+  RatingScreen({super.key}); // Initialize the controller
 
   @override
   Widget build(BuildContext context) {

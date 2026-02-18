@@ -12,7 +12,7 @@ class ChatScreen extends StatefulWidget {
   // final String name;
   // final String? photos;
 
-  ChatScreen({
+  const ChatScreen({
     super.key,
     required this.carTransportId,
     // required this.name,
@@ -33,7 +33,6 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
     chatController.fetchChats(widget.carTransportId);
 
-
     ever(chatController.chats, (_) {
       if (scrollController.hasClients) {
         scrollController.animateTo(
@@ -43,8 +42,6 @@ class _ChatScreenState extends State<ChatScreen> {
         );
       }
     });
-
-
   }
 
   @override
@@ -154,7 +151,8 @@ class _ChatScreenState extends State<ChatScreen> {
         reverse: true,
         itemCount: chatController.chats.length,
         itemBuilder: (context, index) {
-          final chat = chatController.chats[chatController.chats.length - 1 - index];
+          final chat =
+              chatController.chats[chatController.chats.length - 1 - index];
           return _MessageBubble(chat: chat);
         },
       );
@@ -162,22 +160,21 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildOptionsPanel() {
-    return Obx(() => AnimatedSize(
-      duration: AppConstants.animationDuration,
-      child: chatController.isOptionsVisible.value
-          ? _OptionsPanel(chatController: chatController)
-          : const SizedBox.shrink(),
-    ));
+    return Obx(
+      () => AnimatedSize(
+        duration: AppConstants.animationDuration,
+        child: chatController.isOptionsVisible.value
+            ? _OptionsPanel(chatController: chatController)
+            : const SizedBox.shrink(),
+      ),
+    );
   }
 
   Widget _buildMessageInput() {
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Column(
-        children: [
-          const SizedBox(height: 10),
-          _buildMessageInputRow(),
-        ],
+        children: [const SizedBox(height: 10), _buildMessageInputRow()],
       ),
     );
   }
@@ -253,9 +250,7 @@ class _ChatScreenState extends State<ChatScreen> {
           filled: true,
           fillColor: AppConstants.whiteColor,
           hintText: "Your message",
-          hintStyle: TextStyle(
-            color: AppConstants.blackColor.withOpacity(0.4),
-          ),
+          hintStyle: TextStyle(color: AppConstants.blackColor.withOpacity(0.4)),
           prefixIcon: _buildOptionsButton(),
           suffixIcon: _buildSendButton(),
           border: _buildInputBorder(),
@@ -313,10 +308,7 @@ class _ChatScreenState extends State<ChatScreen> {
         title: const Text("Empty message"),
         content: const Text("Please type a message or select an image."),
         actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text("OK"),
-          ),
+          TextButton(onPressed: () => Get.back(), child: const Text("OK")),
         ],
       ),
     );
@@ -335,7 +327,10 @@ class _ChatScreenState extends State<ChatScreen> {
               SizedBox(width: 6),
               Text(
                 'typing…',
-                style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
             ],
           ),
@@ -354,43 +349,40 @@ class _MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String?>(
-
-        future: SharedPreferencesHelper.getUserId(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
-          }
-
-          final userId = snapshot.data ?? '';
-
-          final isMine = chat['senderId'] == userId;
-
-
-          return Align(
-            alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
-            child: Container(
-              margin: const EdgeInsets.all(8),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: isMine ? AppConstants.whiteColor : const Color(
-                    0xFF252525),
-                borderRadius: _getBorderRadius(isMine),
-              ),
-              child: Column(
-                crossAxisAlignment: isMine
-                    ? CrossAxisAlignment.end
-                    : CrossAxisAlignment.start,
-                children: [
-                  if (chat['images'] != null && chat['images'].isNotEmpty)
-                    _MessageImage(imageUrl: chat['images'][0]),
-                  if (chat['message'] != null && chat['message'].isNotEmpty)
-                    _MessageText(message: chat['message']!, isMine: isMine),
-                  _MessageTimestamp(createdAt: chat['createdAt']),
-                ],
-              ),
-            ),
-          );
+      future: SharedPreferencesHelper.getUserId(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
         }
+
+        final userId = snapshot.data ?? '';
+
+        final isMine = chat['senderId'] == userId;
+
+        return Align(
+          alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
+          child: Container(
+            margin: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isMine ? AppConstants.whiteColor : const Color(0xFF252525),
+              borderRadius: _getBorderRadius(isMine),
+            ),
+            child: Column(
+              crossAxisAlignment: isMine
+                  ? CrossAxisAlignment.end
+                  : CrossAxisAlignment.start,
+              children: [
+                if (chat['images'] != null && chat['images'].isNotEmpty)
+                  _MessageImage(imageUrl: chat['images'][0]),
+                if (chat['message'] != null && chat['message'].isNotEmpty)
+                  _MessageText(message: chat['message']!, isMine: isMine),
+                _MessageTimestamp(createdAt: chat['createdAt']),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -399,7 +391,9 @@ class _MessageBubble extends StatelessWidget {
       topLeft: isMine ? const Radius.circular(12) : const Radius.circular(4),
       topRight: const Radius.circular(12),
       bottomLeft: const Radius.circular(12),
-      bottomRight: isMine ? const Radius.circular(4) : const Radius.circular(12),
+      bottomRight: isMine
+          ? const Radius.circular(4)
+          : const Radius.circular(12),
     );
   }
 }
@@ -440,7 +434,9 @@ class _MessageText extends StatelessWidget {
     return Text(
       message,
       style: globalTextStyle(
-        color: isMine ? AppConstants.blackColor : AppConstants.whiteColor.withOpacity(0.8),
+        color: isMine
+            ? AppConstants.blackColor
+            : AppConstants.whiteColor.withOpacity(0.8),
         fontSize: 16,
         fontWeight: FontWeight.w500,
       ),
@@ -468,10 +464,7 @@ class _OptionsPanel extends StatelessWidget {
           children: [
             InkWell(
               onTap: chatController.pickImage,
-              child: Image.asset(
-                "assets/icons/car.png",
-                width: 35,
-              ),
+              child: Image.asset("assets/icons/car.png", width: 35),
             ),
           ],
         ),

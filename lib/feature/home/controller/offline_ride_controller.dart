@@ -1,6 +1,5 @@
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
 
 import '../../../core/network_caller/network_config.dart';
 import '../../../core/network_caller/endpoints.dart';
@@ -43,8 +42,9 @@ class OfflineRideController extends GetxController {
         final data = response.responseData?["data"];
         if (data != null && data is List) {
           rideHistory.value = data
-              .map((e) =>
-              OfflineRideModel.fromJson(Map<String, dynamic>.from(e)))
+              .map(
+                (e) => OfflineRideModel.fromJson(Map<String, dynamic>.from(e)),
+              )
               .toList();
         } else {
           rideHistory.clear();

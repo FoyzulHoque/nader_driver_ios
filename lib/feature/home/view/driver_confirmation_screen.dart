@@ -21,15 +21,19 @@ class DriverConfirmationScreen extends StatefulWidget {
   const DriverConfirmationScreen({super.key});
 
   @override
-  State<DriverConfirmationScreen> createState() => _DriverConfirmationScreenState();
+  State<DriverConfirmationScreen> createState() =>
+      _DriverConfirmationScreenState();
 }
 
 class _DriverConfirmationScreenState extends State<DriverConfirmationScreen> {
   late final DriverConfirmationController driverConfirmationController;
   final HomeController homeController = Get.put(HomeController());
   final ArrivalController controller = Get.put(ArrivalController());
-  final RiderInfoApiController riderInfoApiController = Get.put(RiderInfoApiController());
-  final OnlineRideController onlineRideController = Get.find<OnlineRideController>();
+  final RiderInfoApiController riderInfoApiController = Get.put(
+    RiderInfoApiController(),
+  );
+  final OnlineRideController onlineRideController =
+      Get.find<OnlineRideController>();
 
   @override
   void initState() {
@@ -43,7 +47,8 @@ class _DriverConfirmationScreenState extends State<DriverConfirmationScreen> {
   Future<void> _initializeScreen() async {
     try {
       // First try to get data from OnlineRideController
-      final onlineRide = onlineRideController.selectedRide.value ??
+      final onlineRide =
+          onlineRideController.selectedRide.value ??
           onlineRideController.pendingRides.firstOrNull;
 
       if (onlineRide != null) {
@@ -51,13 +56,17 @@ class _DriverConfirmationScreenState extends State<DriverConfirmationScreen> {
 
         // Try to call RiderInfoApiController with the ride ID
         print('Calling RiderInfoApiController with ID: ${onlineRide.id}');
-        final rideData = await riderInfoApiController.riderInfoApiMethod(onlineRide.id ?? 'unknown'); // Handle nullable id
+        final rideData = await riderInfoApiController.riderInfoApiMethod(
+          onlineRide.id ?? 'unknown',
+        ); // Handle nullable id
 
         if (rideData != null) {
           print('RiderInfoApiController data loaded successfully');
           await _setupRideData(rideData);
         } else {
-          print('RiderInfoApiController failed, using OnlineRideController data');
+          print(
+            'RiderInfoApiController failed, using OnlineRideController data',
+          );
           await _setupRideData(onlineRide);
         }
         return;
@@ -66,8 +75,12 @@ class _DriverConfirmationScreenState extends State<DriverConfirmationScreen> {
       // If no online ride data, try to call RiderInfoApiController with a sample ID
       const sampleTransportId = "sample-transport-id"; // Replace with actual ID
 
-      print('Calling RiderInfoApiController with sample ID: $sampleTransportId');
-      final rideData = await riderInfoApiController.riderInfoApiMethod(sampleTransportId);
+      print(
+        'Calling RiderInfoApiController with sample ID: $sampleTransportId',
+      );
+      final rideData = await riderInfoApiController.riderInfoApiMethod(
+        sampleTransportId,
+      );
 
       if (rideData != null) {
         print('RiderInfoApiController data loaded successfully');
@@ -89,11 +102,15 @@ class _DriverConfirmationScreenState extends State<DriverConfirmationScreen> {
     print('Pickup: (${ride.pickupLat}, ${ride.pickupLng})');
     print('Dropoff: (${ride.dropOffLat}, ${ride.dropOffLng})');
     print('Driver: (${ride.driverLat}, ${ride.driverLng})');
-    print('Status: ${ride.status}, ArrivalConfirmation: ${ride.arrivalConfirmation}');
+    print(
+      'Status: ${ride.status}, ArrivalConfirmation: ${ride.arrivalConfirmation}',
+    );
 
     await driverConfirmationController.setCurrentRide(ride);
     driverConfirmationController.isBottomSheetOpen.value = true;
-    print('Bottom sheet initialized: open=${driverConfirmationController.isBottomSheetOpen.value}');
+    print(
+      'Bottom sheet initialized: open=${driverConfirmationController.isBottomSheetOpen.value}',
+    );
   }
 
   Future<void> _createSampleRideData() async {
@@ -133,13 +150,17 @@ class _DriverConfirmationScreenState extends State<DriverConfirmationScreen> {
         children: [
           // Google Map with real-time updates
           Obx(() {
-            final driverPosition = driverConfirmationController.driverRealTimePosition.value;
-            final cameraPosition = driverConfirmationController.cameraPosition.value;
+            final driverPosition =
+                driverConfirmationController.driverRealTimePosition.value;
+            final cameraPosition =
+                driverConfirmationController.cameraPosition.value;
             final cameraZoom = driverConfirmationController.cameraZoom.value;
 
             print('🗺️ Rendering map with driver position: $driverPosition');
             print('🗺️ Camera position: $cameraPosition, zoom: $cameraZoom');
-            print('🗺️ Markers count: ${driverConfirmationController.markers.length}');
+            print(
+              '🗺️ Markers count: ${driverConfirmationController.markers.length}',
+            );
 
             return GoogleMap(
               initialCameraPosition: CameraPosition(
@@ -152,8 +173,12 @@ class _DriverConfirmationScreenState extends State<DriverConfirmationScreen> {
                 driverConfirmationController.mapController.complete(controller);
                 print('🗺️ Map created with real-time tracking');
                 print('📍 Driver position: $driverPosition');
-                print('📍 Markers: ${driverConfirmationController.markers.length}');
-                print('🛣️ Polylines: ${driverConfirmationController.polylines.length}');
+                print(
+                  '📍 Markers: ${driverConfirmationController.markers.length}',
+                );
+                print(
+                  '🛣️ Polylines: ${driverConfirmationController.polylines.length}',
+                );
 
                 // Auto-zoom after map is created
                 WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -162,7 +187,8 @@ class _DriverConfirmationScreenState extends State<DriverConfirmationScreen> {
               },
               onCameraMove: (CameraPosition position) {
                 // Update camera position in controller
-                driverConfirmationController.cameraPosition.value = position.target;
+                driverConfirmationController.cameraPosition.value =
+                    position.target;
                 driverConfirmationController.cameraZoom.value = position.zoom;
               },
             );
@@ -191,11 +217,16 @@ class _DriverConfirmationScreenState extends State<DriverConfirmationScreen> {
             left: 20,
             right: 20,
             child: Obx(() {
-              final etaToPickup = driverConfirmationController.driverToPickupTime.value;
-              final etaToDestination = driverConfirmationController.pickupToDestinationTime.value;
-              final isMoving = driverConfirmationController.isDriverMoving.value;
-              final isTracking = driverConfirmationController.isLocationTracking.value;
-              final isWebSocketConnected = driverConfirmationController.channel.value != null;
+              final etaToPickup =
+                  driverConfirmationController.driverToPickupTime.value;
+              final etaToDestination =
+                  driverConfirmationController.pickupToDestinationTime.value;
+              final isMoving =
+                  driverConfirmationController.isDriverMoving.value;
+              final isTracking =
+                  driverConfirmationController.isLocationTracking.value;
+              final isWebSocketConnected =
+                  driverConfirmationController.channel.value != null;
 
               return Card(
                 elevation: 4,
@@ -265,7 +296,9 @@ class _DriverConfirmationScreenState extends State<DriverConfirmationScreen> {
                           ),
                           SizedBox(width: 8),
                           Text(
-                            isTracking ? 'Location tracking active' : 'Location tracking off',
+                            isTracking
+                                ? 'Location tracking active'
+                                : 'Location tracking off',
                             style: TextStyle(
                               color: isTracking ? Colors.green : Colors.red,
                             ),
@@ -276,15 +309,23 @@ class _DriverConfirmationScreenState extends State<DriverConfirmationScreen> {
                       Row(
                         children: [
                           Icon(
-                            isWebSocketConnected ? Icons.cloud_done : Icons.cloud_off,
+                            isWebSocketConnected
+                                ? Icons.cloud_done
+                                : Icons.cloud_off,
                             size: 16,
-                            color: isWebSocketConnected ? Colors.green : Colors.red,
+                            color: isWebSocketConnected
+                                ? Colors.green
+                                : Colors.red,
                           ),
                           SizedBox(width: 8),
                           Text(
-                            isWebSocketConnected ? 'WebSocket connected' : 'WebSocket disconnected',
+                            isWebSocketConnected
+                                ? 'WebSocket connected'
+                                : 'WebSocket disconnected',
                             style: TextStyle(
-                              color: isWebSocketConnected ? Colors.green : Colors.red,
+                              color: isWebSocketConnected
+                                  ? Colors.green
+                                  : Colors.red,
                             ),
                           ),
                         ],
@@ -299,7 +340,9 @@ class _DriverConfirmationScreenState extends State<DriverConfirmationScreen> {
           // Bottom Sheet
           Obx(() {
             return driverConfirmationController.isBottomSheetOpen.value
-                ? buildBottomSheet(driverConfirmationController.currentBottomSheet.value)
+                ? buildBottomSheet(
+                    driverConfirmationController.currentBottomSheet.value,
+                  )
                 : Container();
           }),
         ],
@@ -314,10 +357,10 @@ class _DriverConfirmationScreenState extends State<DriverConfirmationScreen> {
             onPressed: () {
               driverConfirmationController.getCurrentLocationManually();
             },
-            child: Icon(Icons.my_location),
             backgroundColor: Colors.orange,
             mini: true,
             tooltip: 'Get Current Device Location',
+            child: Icon(Icons.my_location),
           ),
           SizedBox(height: 10),
 
@@ -326,10 +369,10 @@ class _DriverConfirmationScreenState extends State<DriverConfirmationScreen> {
             onPressed: () {
               driverConfirmationController.refreshRoutes();
             },
-            child: Icon(Icons.refresh),
             backgroundColor: Colors.blue,
             mini: true,
             tooltip: 'Refresh Routes',
+            child: Icon(Icons.refresh),
           ),
           SizedBox(height: 10),
 
@@ -338,16 +381,17 @@ class _DriverConfirmationScreenState extends State<DriverConfirmationScreen> {
             onPressed: () {
               driverConfirmationController.zoomToFitAllPoints();
             },
-            child: Icon(Icons.zoom_out_map),
             backgroundColor: Colors.green,
             mini: true,
             tooltip: 'Zoom to Fit All Points',
+            child: Icon(Icons.zoom_out_map),
           ),
 
           // WebSocket status indicator
           SizedBox(height: 10),
           Obx(() {
-            final isConnected = driverConfirmationController.channel.value != null;
+            final isConnected =
+                driverConfirmationController.channel.value != null;
             return FloatingActionButton(
               onPressed: () {
                 if (isConnected) {
@@ -366,20 +410,23 @@ class _DriverConfirmationScreenState extends State<DriverConfirmationScreen> {
                   );
                 }
               },
+              backgroundColor: isConnected ? Colors.green : Colors.red,
+              mini: true,
+              tooltip: isConnected
+                  ? 'Internet Connected'
+                  : 'Internet Disconnected',
               child: Icon(
                 isConnected ? Icons.cloud_done : Icons.cloud_off,
                 color: Colors.white,
               ),
-              backgroundColor: isConnected ? Colors.green : Colors.red,
-              mini: true,
-              tooltip: isConnected ? 'Internet Connected' : 'Internet Disconnected',
             );
           }),
 
           // Location tracking status - FIXED: Use public method
           SizedBox(height: 10),
           Obx(() {
-            final isTracking = driverConfirmationController.isLocationTracking.value;
+            final isTracking =
+                driverConfirmationController.isLocationTracking.value;
             return FloatingActionButton(
               onPressed: () {
                 if (isTracking) {
@@ -393,13 +440,15 @@ class _DriverConfirmationScreenState extends State<DriverConfirmationScreen> {
                   driverConfirmationController.startLocationTracking();
                 }
               },
+              backgroundColor: isTracking ? Colors.green : Colors.grey,
+              mini: true,
+              tooltip: isTracking
+                  ? 'Location Tracking Active'
+                  : 'Location Tracking Inactive',
               child: Icon(
                 isTracking ? Icons.location_on : Icons.location_off,
                 color: Colors.white,
               ),
-              backgroundColor: isTracking ? Colors.green : Colors.grey,
-              mini: true,
-              tooltip: isTracking ? 'Location Tracking Active' : 'Location Tracking Inactive',
             );
           }),
         ],

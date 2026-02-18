@@ -10,6 +10,7 @@ class CustomContainer extends StatelessWidget {
   TextAlign? align;
 
   CustomContainer({
+    super.key,
     required this.imageUrl,
     required this.text,
     required this.onTap,
@@ -28,7 +29,7 @@ class CustomContainer extends StatelessWidget {
         width: size.width,
         padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         decoration: BoxDecoration(
-          color: bgColor != null ? bgColor : Colors.white,
+          color: bgColor ?? Colors.white,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             width: borderWidth ?? 1.0,
