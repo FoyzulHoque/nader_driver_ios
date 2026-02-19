@@ -10,7 +10,7 @@ import '../controller/register_otp_controller.dart';
 
 class RegisterOtpVerify extends StatefulWidget {
   final String driverPhoneNo;
-  RegisterOtpVerify({super.key, required this.driverPhoneNo});
+  const RegisterOtpVerify({super.key, required this.driverPhoneNo});
   @override
   _ForgetPassOtpVerifyState createState() => _ForgetPassOtpVerifyState();
 }
@@ -89,7 +89,7 @@ class _ForgetPassOtpVerifyState extends State<RegisterOtpVerify> {
                 ),
               ),
               Text(
-                "${widget.driverPhoneNo}",
+                widget.driverPhoneNo,
                 style: globalTextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,

@@ -35,7 +35,6 @@ class PassengerRatingController extends GetxController {
 
   /// Create Review API
   Future<bool> submitReview(String carTransportId) async {
-
     if (_token.isEmpty) {
       await loadToken();
     }
@@ -44,7 +43,7 @@ class PassengerRatingController extends GetxController {
       isLoading(true);
 
       final headers = {
-        'Authorization': '$_token', // Ensure token is a string
+        'Authorization': _token, // Ensure token is a string
         'Content-Type': 'application/json',
       };
 
@@ -54,8 +53,11 @@ class PassengerRatingController extends GetxController {
         "comment": reviewText.value,
       });
 
-      final response =
-      await http.post(Uri.parse(_url), headers: headers, body: body);
+      final response = await http.post(
+        Uri.parse(_url),
+        headers: headers,
+        body: body,
+      );
 
       if (response.statusCode == 201) {
         print('Review submitted: ${response.body}');

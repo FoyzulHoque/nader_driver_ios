@@ -7,8 +7,8 @@ import '../controller/rider_info_api_controller.dart';
 import '../model/online_ride_model.dart';
 
 class BottomSheetFour extends StatefulWidget {
-  late final OnlineRideModel data;
-  BottomSheetFour({super.key, required this.data});
+  final OnlineRideModel data;
+  const BottomSheetFour({super.key, required this.data});
 
   @override
   State<BottomSheetFour> createState() => _BottomSheetFourState();
@@ -19,14 +19,16 @@ class _BottomSheetFourState extends State<BottomSheetFour> {
     DriverConfirmationController(),
   );
 
-
-  final ConfirmArrivelController confirmArrivelController = Get.put(ConfirmArrivelController());
-  final RiderInfoApiController riderInfoApiController=Get.find<RiderInfoApiController>();
+  final ConfirmArrivelController confirmArrivelController = Get.put(
+    ConfirmArrivelController(),
+  );
+  final RiderInfoApiController riderInfoApiController =
+      Get.find<RiderInfoApiController>();
 
   @override
   void initState() {
     // TODO: implement initState
-    riderInfoApiController.riderInfoApiMethod(widget.data.id??"");
+    riderInfoApiController.riderInfoApiMethod(widget.data.id ?? "");
     super.initState();
   }
 
@@ -107,7 +109,9 @@ class _BottomSheetFourState extends State<BottomSheetFour> {
                               elevation: 0,
                             ),
                             onPressed: () {
-                              confirmArrivelController.confirmArrival(carTransportId: widget.data.id ?? 'unknown'); // Handle nullable id
+                              confirmArrivelController.confirmArrival(
+                                carTransportId: widget.data.id ?? 'unknown',
+                              ); // Handle nullable id
                               controller.changeSheet(5);
                             },
                             child: Text(

@@ -78,7 +78,7 @@ class OfflineRideCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  "${ride.pickupLocation}",
+                  ride.pickupLocation,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w400,

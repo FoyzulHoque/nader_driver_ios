@@ -74,7 +74,7 @@ class BottomSheetNine extends StatelessWidget {
                       SizedBox(height: 15),
 
                       Text(
-                        "${data.user?.fullName ?? "Unknown User"}",
+                        data.user?.fullName ?? "Unknown User",
                         style: TextStyle(
                           fontWeight: FontWeight.w400,
                           fontSize: 12,
@@ -94,7 +94,10 @@ class BottomSheetNine extends StatelessWidget {
                             ),
                           ),
 
-                          Text(CurrencyFormatter.format(data.totalAmount ?? 0.0), // Handle nullable totalAmount
+                          Text(
+                            CurrencyFormatter.format(
+                              data.totalAmount ?? 0.0,
+                            ), // Handle nullable totalAmount
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w400,
@@ -148,9 +151,7 @@ class BottomSheetNine extends StatelessWidget {
                       ),
                     ),
                     onPressed: () {
-                      Get.to(() => PassengerRatingScreen(
-                          reviewId.toString()
-                      ));
+                      Get.to(() => PassengerRatingScreen(reviewId.toString()));
                     },
                     child: const Text(
                       "Send",

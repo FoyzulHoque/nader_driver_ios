@@ -73,9 +73,13 @@ class BottomSheetEight extends StatelessWidget {
                       const SizedBox(height: 12),
                       Row(
                         children: [
-                          Image.asset("assets/icons/user.png", height: 20, width: 20),
+                          Image.asset(
+                            "assets/icons/user.png",
+                            height: 20,
+                            width: 20,
+                          ),
                           SizedBox(width: 12),
-                          Text("${data.user?.fullName ?? "Unknown User"}",),
+                          Text(data.user?.fullName ?? "Unknown User"),
                           Spacer(),
 
                           Text(
@@ -109,7 +113,9 @@ class BottomSheetEight extends StatelessWidget {
                           ),
                           Spacer(),
 
-                          Text(CurrencyFormatter.format(data.totalAmount ?? 0.0)) // Handle nullable totalAmount
+                          Text(
+                            CurrencyFormatter.format(data.totalAmount ?? 0.0),
+                          ), // Handle nullable totalAmount
                         ],
                       ),
                       const SizedBox(height: 15),
@@ -131,7 +137,9 @@ class BottomSheetEight extends StatelessWidget {
                       ),
                     ),
                     onPressed: () {
-                      endTripController.endTrip(carTransportId: data.id ?? 'unknown'); // Handle nullable id
+                      endTripController.endTrip(
+                        carTransportId: data.id ?? 'unknown',
+                      ); // Handle nullable id
                       controller.changeSheet(9);
                     },
                     child: const Text(

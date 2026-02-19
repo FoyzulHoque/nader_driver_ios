@@ -68,8 +68,6 @@ import 'package:location/location.dart';
 //   }
 // }
 import 'dart:io';
-import 'package:get/get.dart';
-import 'package:location/location.dart';
 
 class LocationController extends GetxController {
   final Location _location = Location();

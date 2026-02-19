@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import '../controller/notification_controller.dart';
 
 class NotificationWidget extends StatelessWidget {
-  NotificationWidget({
+  const NotificationWidget({
     super.key,
     required this.voidCallback,
     required this.actionName,
@@ -12,8 +12,7 @@ class NotificationWidget extends StatelessWidget {
     required this.style,
     required this.tagId,
     required this.isSwitched,
-    required this.controller
-
+    required this.controller,
   });
 
   final VoidCallback voidCallback;
@@ -23,8 +22,6 @@ class NotificationWidget extends StatelessWidget {
   final String tagId;
   final bool isSwitched;
   final NotificationController controller;
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -50,8 +47,8 @@ class NotificationWidget extends StatelessWidget {
             const Spacer(),
 
             Obx(() {
-              final switchOn = controller.isSwitchOn.value; // use passed controller directly
-
+              final switchOn =
+                  controller.isSwitchOn.value; // use passed controller directly
 
               return GestureDetector(
                 onTap: () {

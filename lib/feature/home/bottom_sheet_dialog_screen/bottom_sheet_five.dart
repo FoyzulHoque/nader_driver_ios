@@ -86,7 +86,7 @@ class BottomSheetFive extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "${data.user?.fullName ?? "Unknown User"}",
+                                  data.user?.fullName ?? "Unknown User",
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
@@ -98,7 +98,11 @@ class BottomSheetFive extends StatelessWidget {
 
                           GestureDetector(
                             onTap: () {
-                              Get.to(() => ChatScreen(carTransportId: data.id ?? 'unknown')); // Handle nullable id
+                              Get.to(
+                                () => ChatScreen(
+                                  carTransportId: data.id ?? 'unknown',
+                                ),
+                              ); // Handle nullable id
                             },
                             child: Icon(Icons.chat_bubble_outline_rounded),
                           ),

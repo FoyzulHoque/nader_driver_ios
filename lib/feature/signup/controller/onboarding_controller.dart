@@ -39,10 +39,10 @@ class OnboardingController extends GetxController {
 
       Map<String, dynamic> formData = {
         "data": jsonEncode({"profile": profileData, "vehicle": vehicleData}),
-        if (profileImage != null) "profileImage": profileImage,
-        if (licenseFrontSide != null) "licenseFrontSide": licenseFrontSide,
-        if (licenseBackSide != null) "licenseBackSide": licenseBackSide,
-        if (vehicleImage != null) "vehicleImage": vehicleImage,
+        "profileImage": ?profileImage,
+        "licenseFrontSide": ?licenseFrontSide,
+        "licenseBackSide": ?licenseBackSide,
+        "vehicleImage": ?vehicleImage,
       };
 
       NetworkResponse response = await NetworkCall.multipartRequestForData(

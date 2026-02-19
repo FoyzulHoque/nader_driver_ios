@@ -17,7 +17,7 @@ import '../widget/notification_widget.dart';
 import '../widget/profile_action_widgets.dart';
 
 class ProfileScreen extends StatefulWidget {
-  ProfileScreen({super.key});
+  const ProfileScreen({super.key});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -151,8 +151,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                             const SizedBox(height: 8),
                             Text(
-                              profile?.fullName?.isNotEmpty == true
-                                  ? profile!.fullName!
+                              profile?.fullName.isNotEmpty == true
+                                  ? profile!.fullName
                                   : "",
                               style: globalTextStyle(
                                 fontSize: 22,
@@ -188,7 +188,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       ],
                                     ),
                                     Text(
-                                      profile?.rating?.toString() ?? "0.0",
+                                      profile?.rating.toString() ?? "0.0",
                                       style: globalTextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
@@ -216,7 +216,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       ],
                                     ),
                                     Text(
-                                      profile?.totalDistance?.toString() ??
+                                      profile?.totalDistance.toString() ??
                                           "0.0KM",
                                       style: globalTextStyle(
                                         fontSize: 12,
@@ -367,7 +367,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 21),
                   ProfileActionWidgets(
-                    image: "assets/icons/del.png",
+                    image: "assets/icons/delete.png",
                     actionName: "Account Delete",
                     style: globalTextStyle(),
                     voidCallback: () async {
