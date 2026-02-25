@@ -24,6 +24,7 @@ class MyRidesCompletedController extends GetxController {
     // Fetch rides initially
     fetchMyCompletedRides();
   }
+
   void fetchMyCompletedRidesData() {
     Logger().e("fetchMyCompletedRides called");
     fetchMyCompletedRides();
@@ -44,9 +45,7 @@ class MyRidesCompletedController extends GetxController {
         return;
       }
 
-      final response = await NetworkCall.getRequest(
-        url: NetworkPath.myRides
-      );
+      final response = await NetworkCall.getRequest(url: NetworkPath.myRides);
 
       if (response.isSuccess) {
         final data = response.responseData?["data"];
@@ -69,6 +68,4 @@ class MyRidesCompletedController extends GetxController {
       if (EasyLoading.isShow) EasyLoading.dismiss();
     }
   }
-
-
 }

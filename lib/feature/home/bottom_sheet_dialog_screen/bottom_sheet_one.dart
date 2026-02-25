@@ -82,8 +82,8 @@ class BottomSheetOne extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
-                            "Hey Ahmed wants to ride with you",
+                          Text(
+                            "${data.user?.fullName} wants to ride with you",
                             style: TextStyle(fontSize: 14),
                           ),
                           Container(
