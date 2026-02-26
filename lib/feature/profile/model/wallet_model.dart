@@ -54,7 +54,7 @@ class TransactionModel {
       id: json["id"] ?? "",
       totalAmount: (json["totalAmount"] ?? 0).toDouble(),
       distance: (json["distance"] ?? 0).toDouble(),
-      rideTime: json["rideTime"] ?? 0,
+      rideTime: json["actualRideTime"] ?? 0,
       serviceType: json["serviceType"] ?? "",
       createdAt: json["createdAt"] ?? "",
       userName: json["user"]["fullName"] ?? "Unknown",

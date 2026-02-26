@@ -9,7 +9,6 @@ class ReviewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //  Fetch reviews when screen loads
     controller.fetchMyReviews();
 
     return Scaffold(
@@ -24,12 +23,15 @@ class ReviewScreen extends StatelessWidget {
         title: const Text(
           "Review",
           style: TextStyle(
-              fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black),
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Colors.black,
+          ),
         ),
         centerTitle: true,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Obx(() {
           /// 🔹 1. Show loading spinner
           if (controller.isLoading.value) {
@@ -46,84 +48,148 @@ class ReviewScreen extends StatelessWidget {
             return const Center(child: Text("No reviews found"));
           }
 
-          /// 🔹 4. Show reviews list
-          return ListView.separated(
-            itemCount: controller.myReviews.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              final item = controller.myReviews[index];
-              return Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.shade200,
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    )
-                  ],
-                ),
-                child: Row(
+          /// 🔹 4. Show reviews list with Header
+          return Column(
+            children: [
+              /// ⭐ Overall Rating Header
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Column(
                   children: [
-                    CircleAvatar(
-                      radius: 26,
-                      backgroundImage: NetworkImage(item.reviewer.profileImage),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(item.reviewer.fullName,
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.w600, fontSize: 15)),
-                          const SizedBox(height: 6),
-
-                          /// ⭐ Rating Stars
-                          Row(
-                            children: List.generate(5, (starIndex) {
-                              double rating = item.rating.toDouble();
-                              if (starIndex < rating.floor()) {
-                                return const Icon(Icons.star,
-                                    color: Colors.amber, size: 18);
-                              } else if (starIndex < rating) {
-                                return const Icon(Icons.star_half,
-                                    color: Colors.amber, size: 18);
-                              } else {
-                                return const Icon(Icons.star_border,
-                                    color: Colors.amber, size: 18);
-                              }
-                            }),
-                          ),
-                          const SizedBox(height: 6),
-
-                          /// Comment
-                          Text(item.comment,
-                              style: const TextStyle(
-                                  fontSize: 13, color: Colors.black54)),
-                        ],
+                    Text(
+                      controller.avgRating.value.toStringAsFixed(1),
+                      style: const TextStyle(
+                        fontSize: 48,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        const Text("Rating",
-                            style: TextStyle(
-                                fontSize: 13, color: Colors.grey)),
-                        const SizedBox(height: 4),
-                        Text(
-                          item.rating.toString(),
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w600),
-                        ),
-                      ],
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(5, (starIndex) {
+                        return Icon(
+                          starIndex < controller.avgRating.value.floor()
+                              ? Icons.star
+                              : Icons.star_border,
+                          color: Colors.amber,
+                          size: 24,
+                        );
+                      }),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "Based on ${controller.myReviews.length} reviews",
+                      style: const TextStyle(color: Colors.grey),
                     ),
                   ],
                 ),
-              );
-            },
+              ),
+              const Divider(),
+
+              /// 🔹 Scrollable Reviews List
+              Expanded(
+                child: ListView.separated(
+                  itemCount: controller.myReviews.length,
+                  padding: const EdgeInsets.only(top: 10, bottom: 20),
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final item = controller.myReviews[index];
+                    return Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade100),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.03),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CircleAvatar(
+                            radius: 24,
+                            backgroundImage: NetworkImage(
+                              item.reviewer.profileImage,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      item.reviewer.fullName,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.amber.shade100,
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.star,
+                                            size: 12,
+                                            color: Colors.amber,
+                                          ),
+                                          Text(
+                                            " ${item.rating}",
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  item.comment.isEmpty
+                                      ? "No comment provided"
+                                      : item.comment,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                if (item.isFlagged) ...[
+                                  const SizedBox(height: 4),
+                                  const Text(
+                                    "Reported by system",
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           );
         }),
       ),
