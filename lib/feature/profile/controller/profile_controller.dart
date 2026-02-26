@@ -24,6 +24,7 @@ class ProfileController extends GetxController {
   var profileImage = <File>[].obs;
   var drivingLicenseFrontImage = <File>[].obs;
   var drivingLicenseBackImage = <File>[].obs;
+  var averageRating = "0.0".obs;
 
   // Store existing license image URLs
   String? existingLicenseFrontUrl;
@@ -132,10 +133,32 @@ class ProfileController extends GetxController {
     }
   }
 
+  Future<void> fetchMyReviews() async {
+    try {
+      NetworkResponse response = await NetworkCall.getRequest(
+        url: NetworkPath.myReviews,
+      );
+
+      if (response.isSuccess && response.responseData != null) {
+        final responseBody = response.responseData!["data"];
+
+        if (responseBody != null && responseBody["avgRating"] != null) {
+          averageRating.value = responseBody["avgRating"].toString();
+          print("Fetched Rating: ${averageRating.value}"); // Debug print
+        }
+      } else {
+        print("API Error: ${response.errorMessage}");
+      }
+    } catch (e) {
+      print("Exception fetching reviews: $e");
+    }
+  }
+
   @override
   void onInit() {
     super.onInit();
     fetchDriverProfile();
+    fetchMyReviews();
   }
 
   // Clear user profile (e.g. on logout)

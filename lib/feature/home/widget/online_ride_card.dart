@@ -12,6 +12,10 @@ class OnlineRideCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Getting current driver name from the model if available, else 'Driver'
+    final driverName = ride.vehicle?.driver?.fullName ?? "Driver";
+    final riderName = ride.user?.fullName ?? "Someone";
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -33,12 +37,12 @@ class OnlineRideCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
+            // Header - Personalized Greeting
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Hey ${ride.vehicle?.driver?.fullName ?? 'Someone'} wants to ride with you",
+                  "Hey $driverName,\n$riderName wants to ride with you",
                   style: const TextStyle(fontSize: 14),
                 ),
                 const Text(
@@ -51,40 +55,42 @@ class OnlineRideCard extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
 
-            // Profile & Ride Info
+            // Profile & Pickup Time
             Row(
               children: [
                 CircleAvatar(
-                  radius: 36,
-                  backgroundImage: (ride.user?.profileImage != null &&
-                      ride.user!.profileImage!.isNotEmpty)
+                  radius: 30,
+                  backgroundImage:
+                      (ride.user?.profileImage != null &&
+                          ride.user!.profileImage!.isNotEmpty)
                       ? NetworkImage(ride.user!.profileImage!)
                       : const AssetImage("assets/icons/profile_pas.png")
-                  as ImageProvider,
+                            as ImageProvider,
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  ride.user?.fullName ?? "Unknown User",
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    riderName,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-                const Spacer(),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
+                    const Text(
+                      "Pickup Time",
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
                     Text(
                       _formatTime(ride.pickupTime ?? ""),
-                      style: const TextStyle(color: Color(0xff000000)),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "${(ride.distance ?? 0).toStringAsFixed(2)} km",
-                      style: TextStyle(
-                        color: const Color(0xff000000).withOpacity(0.3),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
                     ),
                   ],
@@ -92,76 +98,47 @@ class OnlineRideCard extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 16),
+            const Divider(height: 32),
 
-            // Route Info
+            // Pickup Field
             Row(
               children: [
-                Image.asset("assets/icons/icon7.png", height: 20, width: 20),
+                Image.asset("assets/icons/location.png", height: 16),
                 const SizedBox(width: 8),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    "Your Route",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.black,
-                    ),
+                    "Pick up: ${ride.pickupLocation ?? 'Not specified'}",
+                    style: const TextStyle(fontSize: 15),
                   ),
                 ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Drop off Field
+            Row(
+              children: [
+                Image.asset("assets/icons/location.png", height: 16),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    "Drop off: ${ride.dropOffLocation ?? 'Not specified'}",
+                    style: const TextStyle(fontSize: 15),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Distance: ${(ride.distance ?? 0).toStringAsFixed(2)} km"),
                 Text(
-                  "Cash",
-                  style: TextStyle(
+                  CurrencyFormatter.format(ride.totalAmount ?? 0),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
                     fontSize: 18,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xff777F8B),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            // User and Price
-            Row(
-              children: [
-                Image.asset("assets/icons/user.png", height: 20, width: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    ride.user?.fullName ?? "Unknown User",
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-                Text(CurrencyFormatter.format(ride.totalAmount ?? 0)),
-              ],
-            ),
-
-            const SizedBox(height: 8),
-
-            // Pickup Location
-            Row(
-              children: [
-                Image.asset(
-                  "assets/icons/location.png",
-                  height: 20,
-                  width: 20,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    (ride.pickupLocation ?? "").isNotEmpty
-                        ? ride.pickupLocation!
-                        : "Unknown Pickup Address",
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.black,
-                    ),
+                    color: Colors.blue,
                   ),
                 ),
               ],
@@ -172,16 +149,14 @@ class OnlineRideCard extends StatelessWidget {
     );
   }
 
-  /// Helper function to format time string (e.g., "14:45") to "02:45 PM"
   String _formatTime(String timeString) {
     try {
-      final parts = timeString.split(':'); // ["14", "45"]
+      final parts = timeString.split(':');
       if (parts.length >= 2) {
         final hour = int.parse(parts[0]);
         final minute = int.parse(parts[1]);
-        final now = DateTime.now();
-        final time = DateTime(now.year, now.month, now.day, hour, minute);
-        return DateFormat('hh:mm a').format(time); // e.g., 02:45 PM
+        final time = DateTime(0, 0, 0, hour, minute);
+        return DateFormat('hh:mm a').format(time);
       }
       return timeString;
     } catch (e) {

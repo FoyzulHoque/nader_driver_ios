@@ -5,7 +5,6 @@ import '../../../core/network_caller/endpoints.dart';
 import '../../../core/shared_preference/shared_preferences_helper.dart';
 import '../model/wallet_model.dart';
 
-
 class DriverIncomeController extends GetxController {
   var isLoading = false.obs;
   var errorMessage = "".obs;
@@ -16,6 +15,16 @@ class DriverIncomeController extends GetxController {
   var totalTrips = 0.obs;
 
   var transactionHistory = <TransactionModel>[].obs;
+
+  String formatMinutes(int totalMinutes) {
+    if (totalMinutes <= 0) return "0m";
+    if (totalMinutes < 60) return "${totalMinutes}m";
+
+    int hours = totalMinutes ~/ 60;
+    int minutes = totalMinutes % 60;
+
+    return minutes == 0 ? "${hours}h" : "${hours}h ${minutes}m";
+  }
 
   @override
   void onInit() {
@@ -37,7 +46,7 @@ class DriverIncomeController extends GetxController {
       }
 
       final response = await NetworkCall.getRequest(
-        url: NetworkPath.driverIncome
+        url: NetworkPath.driverIncome,
       );
 
       if (response.isSuccess) {

@@ -9,52 +9,43 @@ class ReviewController extends GetxController {
   var isLoading = false.obs;
   var errorMessage = "".obs;
   var myReviews = <ReviewModel>[].obs;
+  var avgRating = 0.0.obs;
 
   @override
   void onInit() {
     super.onInit();
-    fetchMyReviews(); // Fetch reviews when the controller is initialized
+    fetchMyReviews();
   }
 
-  /// Fetch My Reviews
   Future<void> fetchMyReviews() async {
     isLoading.value = true;
     errorMessage.value = "";
-    EasyLoading.show(status: "Fetching reviews...");
 
     try {
-      final token = await SharedPreferencesHelper.getAccessToken();
-      if (token == null || token.isEmpty) {
-        errorMessage.value = "Access token not found. Please login.";
-        EasyLoading.showError(errorMessage.value);
-        return;
-      }
-
-      final response = await NetworkCall.getRequest(
-        url: NetworkPath.myReviews
-      );
+      final response = await NetworkCall.getRequest(url: NetworkPath.myReviews);
 
       if (response.isSuccess) {
-        final data = response.responseData?["data"];
-        if (data != null && data is List) {
-          myReviews.value = data
-              .map((e) => ReviewModel.fromJson(Map<String, dynamic>.from(e)))
-              .toList();
-        } else {
-          myReviews.clear();
+        final dataWrapper = response.responseData?["data"];
+        if (dataWrapper != null) {
+          // Store the Average Rating
+          avgRating.value = (dataWrapper["avgRating"] ?? 0).toDouble();
+
+          // Access the nested "data" list
+          final List? reviewList = dataWrapper["data"];
+          if (reviewList != null) {
+            myReviews.value = reviewList
+                .map((e) => ReviewModel.fromJson(Map<String, dynamic>.from(e)))
+                .toList();
+          }
         }
-        EasyLoading.showSuccess("Reviews fetched successfully");
+        EasyLoading.dismiss();
       } else {
-        errorMessage.value =
-            response.errorMessage ?? "Failed to load reviews";
-        EasyLoading.showError(errorMessage.value);
+        errorMessage.value = response.errorMessage ?? "Failed to load reviews";
       }
     } catch (e) {
       errorMessage.value = "Error: $e";
-      EasyLoading.showError(errorMessage.value);
     } finally {
       isLoading.value = false;
-      if (EasyLoading.isShow) EasyLoading.dismiss();
     }
   }
 }

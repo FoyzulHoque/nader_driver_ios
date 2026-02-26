@@ -187,11 +187,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         ),
                                       ],
                                     ),
-                                    Text(
-                                      profile?.rating.toString() ?? "0.0",
-                                      style: globalTextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
+                                    Obx(
+                                      () => Text(
+                                        profileController.averageRating.value,
+                                        style: globalTextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
                                   ],

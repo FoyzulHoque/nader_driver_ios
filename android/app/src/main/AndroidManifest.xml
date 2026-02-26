@@ -9,6 +9,11 @@
         android:label="Brother Taxi Drivers"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyC7AoMhe2ZP3iHflCVr6a3VeL0ju0bzYVE" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

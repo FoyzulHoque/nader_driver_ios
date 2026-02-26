@@ -71,24 +71,33 @@ class OfflineRideCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
 
-          /// Destination
           Row(
             children: [
               Image.asset("assets/icons/location.png", height: 16),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  ride.pickupLocation,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.black,
-                  ),
+                  "From: ${ride.pickupLocation}",
+                  style: const TextStyle(fontSize: 14, color: Colors.black87),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
+
+          /// Drop-off Location
+          Row(
+            children: [
+              Image.asset("assets/icons/location.png", height: 16),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  "To: ${ride.dropOffLocation}",
+                  style: const TextStyle(fontSize: 14, color: Colors.black87),
+                ),
+              ),
+            ],
+          ),
 
           /// Payment & Amount
           Row(
@@ -96,11 +105,11 @@ class OfflineRideCard extends StatelessWidget {
               Image.asset("assets/icons/cash.png", height: 16),
               const SizedBox(width: 8),
               Text(
-                "${ride.totalAmount} LBP",
+                "ل.ل ${ride.totalAmount}",
                 style: const TextStyle(
-                  color: Color(0xFFFFDC71),
+                  color: Color(0xFF000000),
                   fontWeight: FontWeight.w400,
-                  fontSize: 18,
+                  fontSize: 14,
                 ),
               ),
             ],
