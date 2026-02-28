@@ -2,7 +2,6 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import '../../../core/network_caller/endpoints.dart';
 import '../../../core/network_caller/network_config.dart';
-import '../../../core/shared_preference/shared_preferences_helper.dart';
 import '../model/review_model.dart';
 
 class ReviewController extends GetxController {
