@@ -12,12 +12,10 @@ class SplashScreen extends StatelessWidget {
     return Scaffold(
       body: SizedBox.expand(
         child: Stack(
-          fit: StackFit.expand, // Ensures children fill the stack
+          fit: StackFit.expand,
           children: [
             Image.asset("assets/images/newsplash.jpg", fit: BoxFit.cover),
 
-            // Semi-transparent overlay if text needs better contrast (optional)
-            // Container(color: Colors.black.withOpacity(0.4)),
             SafeArea(
               child: Padding(
                 padding: const EdgeInsets.symmetric(

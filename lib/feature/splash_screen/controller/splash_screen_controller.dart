@@ -12,7 +12,7 @@ class SplashScreenController extends GetxController {
 
       if (!showOnboard) {
         await SharedPreferencesHelper.setShowOnboard(true);
-        Get.offAllNamed(AppRoute.onboardingScreen);
+        Get.offAllNamed(AppRoute.registerScreen);
       } else if (token != null && token.isNotEmpty) {
         Get.offAllNamed(AppRoute.bottomNavbarUser);
       } else {

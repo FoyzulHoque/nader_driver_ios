@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/const/app_colors.dart';
 import '../../../core/const/image_path.dart';
-import '../../auth/onboarding/controller/onboarding_controller.dart';
 import '../controller/signup_controller.dart';
 import '../widget/car_image_widget.dart';
 import '../widget/custom_input_field.dart';
@@ -12,23 +11,15 @@ import '../widget/insurance_widget.dart';
 import '../widget/judicial_record_widget.dart';
 import '../widget/signup_for_car_profile_image_widget.dart';
 
-
 class SignUpScreen extends StatelessWidget {
   final double? latitude;
   final double? longitude;
 
-  const SignUpScreen({
-    super.key,
-     this.latitude,
-     this.longitude,
-  });
+  const SignUpScreen({super.key, this.latitude, this.longitude});
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(SignUpController());
-    final OnboardingControllers onboardingController=Get.put(OnboardingControllers());
-
-
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -73,7 +64,6 @@ class SignUpScreen extends StatelessWidget {
               onChanged: (val) => controller.updateField("address", val),
             ),
 
-
             const SizedBox(height: 16),
             NidCardWidget(),
             const SizedBox(height: 16),
@@ -96,11 +86,13 @@ class SignUpScreen extends StatelessWidget {
             const SizedBox(height: 16),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-                child: JudicialRecordWidget()), // Judicial Record field
+              child: JudicialRecordWidget(),
+            ), // Judicial Record field
             const SizedBox(height: 16),
             SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: InsuranceWidget()),
+              scrollDirection: Axis.horizontal,
+              child: InsuranceWidget(),
+            ),
             const SizedBox(height: 20),
             const Text(
               "Taxi Information",
@@ -110,7 +102,6 @@ class SignUpScreen extends StatelessWidget {
                 color: Colors.grey,
               ),
             ),
-
 
             const SizedBox(height: 16),
             CarImageWidget(), //  New Added
@@ -127,13 +118,13 @@ class SignUpScreen extends StatelessWidget {
             ),
             CustomInputField(
               hintText: " License Plate Number*",
-              onChanged: (val) => controller.updateField("licensePlateNumber", val),
+              onChanged: (val) =>
+                  controller.updateField("licensePlateNumber", val),
             ),
 
             const SizedBox(height: 20),
 
             // CarLicenseWidget(), //  New added
-
             const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
