@@ -1,10 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class WebSocketService {
   late WebSocketChannel _channel;
+  var isConnected = false.obs;
 
   void connect(String url, String token) {
     _channel = WebSocketChannel.connect(Uri.parse(url));
@@ -33,6 +35,7 @@ class WebSocketService {
     if (kDebugMode) {
       print("Closing WebSocket connection.");
     }
+    isConnected.value = false;
     _channel.sink.close();
   }
 }

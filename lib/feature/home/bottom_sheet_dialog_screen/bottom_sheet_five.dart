@@ -8,9 +8,8 @@ class BottomSheetFive extends StatelessWidget {
   late final OnlineRideModel data;
   BottomSheetFive({super.key, required this.data});
 
-  final DriverConfirmationController controller = Get.put(
-    DriverConfirmationController(),
-  );
+  final DriverConfirmationController controller =
+      Get.find<DriverConfirmationController>();
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +98,7 @@ class BottomSheetFive extends StatelessWidget {
                           GestureDetector(
                             onTap: () {
                               Get.to(
-                                () => ChatScreen(
+                                () => DriverChatScreen(
                                   carTransportId: data.id ?? 'unknown',
                                 ),
                               ); // Handle nullable id

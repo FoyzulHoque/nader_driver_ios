@@ -15,9 +15,8 @@ class BottomSheetFour extends StatefulWidget {
 }
 
 class _BottomSheetFourState extends State<BottomSheetFour> {
-  final DriverConfirmationController controller = Get.put(
-    DriverConfirmationController(),
-  );
+  final DriverConfirmationController controller =
+      Get.find<DriverConfirmationController>();
 
   final ConfirmArrivelController confirmArrivelController = Get.put(
     ConfirmArrivelController(),

@@ -10,9 +10,9 @@ class BottomSheetOne extends StatelessWidget {
   final OnlineRideModel data;
   BottomSheetOne({super.key, required this.data});
 
-  final DriverConfirmationController controller = Get.put(
-    DriverConfirmationController(),
-  );
+  final DriverConfirmationController controller =
+      Get.find<DriverConfirmationController>();
+
   final AcceptAndDeclineController acceptAndDeclineController = Get.put(
     AcceptAndDeclineController(),
   );

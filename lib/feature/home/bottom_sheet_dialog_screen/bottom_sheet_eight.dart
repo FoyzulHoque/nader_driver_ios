@@ -9,9 +9,8 @@ class BottomSheetEight extends StatelessWidget {
   late final OnlineRideModel data;
   BottomSheetEight({super.key, required this.data});
 
-  final DriverConfirmationController controller = Get.put(
-    DriverConfirmationController(),
-  );
+  final DriverConfirmationController controller =
+      Get.find<DriverConfirmationController>();
   final EndTripController endTripController = Get.put(EndTripController());
 
   @override
