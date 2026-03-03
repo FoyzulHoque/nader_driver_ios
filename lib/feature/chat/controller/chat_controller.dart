@@ -64,21 +64,29 @@ class DriverChatController extends GetxController {
     _lastToken = token;
 
     webSocketService.connect(url, token);
+
     webSocketService.messages.listen(
-      _handleMessage,
+      (raw) {
+        final data = jsonDecode(raw);
+
+        if (data['event'] == 'authenticated') {
+          if (kDebugMode) print("Driver socket authenticated");
+
+          fetchUserList();
+
+          if (currentChatId.value.isNotEmpty) {
+            fetchChats(currentChatId.value);
+          }
+        }
+
+        _handleMessage(raw);
+      },
       onDone: _onSocketClosed,
       onError: (error, stack) {
         if (kDebugMode) print("WebSocket error: $error");
         _scheduleReconnect();
       },
     );
-
-    Future.delayed(const Duration(milliseconds: 500), () {
-      fetchUserList();
-      if (currentChatId.value.isNotEmpty) {
-        fetchChats(currentChatId.value);
-      }
-    });
   }
 
   void _handleMessage(dynamic message) {
@@ -189,8 +197,14 @@ class DriverChatController extends GetxController {
   }
 
   Future<void> fetchChats(String carTransportId) async {
+    if (!webSocketService.isAuthenticated.value) {
+      if (kDebugMode) print("Not authenticated yet. Waiting...");
+      return;
+    }
+
     isLoadingChats.value = true;
-    currentChatId.value = carTransportId; // ✅ Always update current chat ID
+    currentChatId.value = carTransportId;
+
     webSocketService.sendMessage("joinChat", {
       "carTransportId": carTransportId,
     });
