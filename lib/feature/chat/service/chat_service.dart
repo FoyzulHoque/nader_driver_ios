@@ -12,6 +12,7 @@ class WebSocketService {
       StreamController<String>.broadcast();
 
   final isConnected = false.obs;
+
   final isAuthenticated = false.obs;
 
   Stream<String> get messages => _messageController.stream;
