@@ -204,7 +204,6 @@ class DriverChatController extends GetxController {
 
     isLoadingChats.value = true;
     currentChatId.value = carTransportId;
-
     webSocketService.sendMessage("joinChat", {
       "carTransportId": carTransportId,
     });

@@ -25,14 +25,10 @@ class _DriverChatScreenState extends State<DriverChatScreen> {
   void initState() {
     super.initState();
     chatController = Get.find<DriverChatController>();
-
-    // ✅ Load userId once upfront
+    chatController.currentChatId.value = widget.carTransportId;
     _loadUserId();
-
-    // ✅ Fetch chat messages
     chatController.fetchChats(widget.carTransportId);
 
-    // ✅ Scroll to bottom when new messages arrive
     ever(chatController.chats, (_) {
       _scrollToBottom();
     });
