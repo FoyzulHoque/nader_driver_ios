@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/driver_confirmation_controller.dart';
@@ -8,7 +7,8 @@ class BottomSheetTwo extends StatelessWidget {
   late final OnlineRideModel data;
   BottomSheetTwo({super.key, required this.data});
 
-  final DriverConfirmationController controller = Get.find<DriverConfirmationController>();
+  final DriverConfirmationController controller =
+      Get.find<DriverConfirmationController>();
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +86,9 @@ class BottomSheetTwo extends StatelessWidget {
                             ),
                             onPressed: () async {
                               await controller.connectWebSocket();
-                              controller.changeSheet(7); // Changed to 7 for End Trip sheet
+                              controller.changeSheet(
+                                3,
+                              ); // Changed to 7 for End Trip sheet
                             },
                             child: const Text(
                               "Arrival Confirmation",

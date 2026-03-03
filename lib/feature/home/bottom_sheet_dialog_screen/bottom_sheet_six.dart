@@ -8,10 +8,11 @@ class BottomSheetSix extends StatelessWidget {
   late final OnlineRideModel data;
   BottomSheetSix({super.key, required this.data});
 
-  final DriverConfirmationController controller = Get.put(
-    DriverConfirmationController(),
+  final DriverConfirmationController controller =
+      Get.find<DriverConfirmationController>();
+  final StartTheJourneyController startTheJourneyController = Get.put(
+    StartTheJourneyController(),
   );
-  final StartTheJourneyController startTheJourneyController = Get.put(StartTheJourneyController());
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +75,9 @@ class BottomSheetSix extends StatelessWidget {
                       ),
                     ),
                     onPressed: () {
-                      startTheJourneyController.startTheJourney(carTransportId: data.id ?? 'unknown'); // Handle nullable id
+                      startTheJourneyController.startTheJourney(
+                        carTransportId: data.id ?? 'unknown',
+                      ); // Handle nullable id
                       controller.changeSheet(7);
                     },
                     child: const Text(

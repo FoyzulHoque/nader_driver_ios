@@ -9,9 +9,8 @@ import '../model/online_ride_model.dart';
 class BottomSheetThree extends StatelessWidget {
   late final OnlineRideModel data;
   BottomSheetThree({super.key, required this.data});
-  final DriverConfirmationController controller = Get.put(
-    DriverConfirmationController(),
-  );
+  final DriverConfirmationController controller =
+      Get.find<DriverConfirmationController>();
 
   late final String carTransportId = data.id ?? 'unknown'; // Handle nullable id
 
@@ -89,11 +88,8 @@ class BottomSheetThree extends StatelessWidget {
                               // Header
                               Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Text(
-                                    "Hey Ahmed wants to ride with you",
-                                  ),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 8,
@@ -104,7 +100,7 @@ class BottomSheetThree extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: const Text(
-                                      "New",
+                                      "Ongoing",
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
@@ -121,15 +117,15 @@ class BottomSheetThree extends StatelessWidget {
                                   CircleAvatar(
                                     radius: 24,
                                     backgroundImage: NetworkImage(
-                                        data.user?.profileImage ?? ""
+                                      data.user?.profileImage ?? "",
                                     ),
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                      children:  [
+                                          CrossAxisAlignment.start,
+                                      children: [
                                         Text(
                                           data.user?.fullName ?? "Unknown User",
                                           style: TextStyle(
@@ -155,7 +151,10 @@ class BottomSheetThree extends StatelessWidget {
                                     ),
                                   ),
                                   const SizedBox(width: 8),
-                                  Text(CurrencyFormatter.format(data.totalAmount ?? 0.0), // Handle nullable totalAmount
+                                  Text(
+                                    CurrencyFormatter.format(
+                                      data.totalAmount ?? 0.0,
+                                    ), // Handle nullable totalAmount
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
@@ -170,16 +169,27 @@ class BottomSheetThree extends StatelessWidget {
                                 children: [
                                   const Icon(Icons.person, size: 20),
                                   const SizedBox(width: 8),
-                                  Expanded(child: Text(data.user?.fullName ?? "Unknown User",)),
+                                  Expanded(
+                                    child: Text(
+                                      data.user?.fullName ?? "Unknown User",
+                                    ),
+                                  ),
                                 ],
                               ),
                               const SizedBox(height: 10),
                               Row(
                                 children: [
-                                  const Icon(Icons.location_on_outlined, size: 20),
+                                  const Icon(
+                                    Icons.location_on_outlined,
+                                    size: 20,
+                                  ),
                                   const SizedBox(width: 8),
                                   Expanded(
-                                    child: Text(data.pickupLocation?.isNotEmpty == true ? data.pickupLocation! : "Unknown Pickup Address"), // Handle nullable pickupLocation
+                                    child: Text(
+                                      data.pickupLocation?.isNotEmpty == true
+                                          ? data.pickupLocation!
+                                          : "Unknown Pickup Address",
+                                    ), // Handle nullable pickupLocation
                                   ),
                                 ],
                               ),
@@ -206,7 +216,11 @@ class BottomSheetThree extends StatelessWidget {
                                 icon: const Icon(Icons.call),
                                 label: const Text("Call"),
                                 onPressed: () async {
-                                  final Uri phoneUri = Uri(scheme: 'tel', path: data.vehicle?.driver?.phoneNumber ?? ''); // Handle nullable phoneNumber
+                                  final Uri phoneUri = Uri(
+                                    scheme: 'tel',
+                                    path:
+                                        data.vehicle?.driver?.phoneNumber ?? '',
+                                  ); // Handle nullable phoneNumber
                                   if (await canLaunchUrl(phoneUri)) {
                                     await launchUrl(phoneUri);
                                   } else {
@@ -233,7 +247,11 @@ class BottomSheetThree extends StatelessWidget {
                                 icon: const Icon(Icons.chat_bubble_outline),
                                 label: const Text("Chat"),
                                 onPressed: () {
-                                  Get.to(ChatScreen(carTransportId: carTransportId));
+                                  Get.to(
+                                    DriverChatScreen(
+                                      carTransportId: carTransportId,
+                                    ),
+                                  );
                                 },
                               ),
                             ),

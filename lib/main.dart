@@ -23,7 +23,7 @@ void main() async {
   Get.put(OnlineRideController());
   Get.put(RiderInfoApiController());
   Get.put(DriverConfirmationController());
-  Get.put(ChatController());
+  Get.put(DriverChatController());
 
   runApp(const MyApp());
 }

@@ -303,33 +303,19 @@ class DriverConfirmationController extends GetxController {
     isLoading.value = true;
 
     try {
-      print('🛣️ Setting up routes based on status...');
+      polylines.clear();
+      routeInfo.clear();
+
       print(
-        '📍 Status: ${currentRide!.status}, ArrivalConfirmation: ${currentRide!.arrivalConfirmation}',
+        '🛣️ Drawing orange (Driver→Pickup) and yellow (Pickup→Destination)',
       );
 
-      if (currentRide!.status == "ONGOING") {
-        if (currentRide!.arrivalConfirmation == false) {
-          // Driver to Pickup route
-          await _fetchAndDrawDriverToPickupRoute();
-          print('✅ Drawing Driver to Pickup route');
-        } else {
-          // Driver to Dropoff route
-          await _fetchAndDrawDriverToDropoffRoute();
-          print('✅ Drawing Driver to Dropoff route');
-        }
-      } else {
-        // Default: Show both routes
-        await _fetchAndDrawDriverToPickupRoute();
-        await _fetchAndDrawPickupToDestinationRoute();
-        print('✅ Drawing both routes (default)');
-      }
+      await _fetchAndDrawDriverToPickupRoute();
+      await _fetchAndDrawPickupToDestinationRoute();
 
-      // Auto-zoom to fit all points
       await zoomToFitAllPoints();
     } catch (e) {
       print('❌ Error setting up routes: $e');
-      // Fallback to manual routes
       _createFallbackRoutes();
     } finally {
       isLoading.value = false;
@@ -375,7 +361,7 @@ class DriverConfirmationController extends GetxController {
         _addPolylineToMap(
           routePoints,
           'driver_to_pickup',
-          Colors.green,
+          Colors.orange,
           5,
           'Driver to Pickup',
         );
@@ -409,7 +395,7 @@ class DriverConfirmationController extends GetxController {
       if (routePoints.isNotEmpty) {
         _addPolylineToMap(
           routePoints,
-          'driver_to_dropoff',
+          'driver_to_pickup',
           Colors.orange,
           5,
           'Driver to Dropoff',
@@ -440,7 +426,7 @@ class DriverConfirmationController extends GetxController {
         _addPolylineToMap(
           routePoints,
           'pickup_to_destination',
-          Colors.blue,
+          Colors.yellow,
           5,
           'Pickup to Destination',
         );
@@ -470,6 +456,8 @@ class DriverConfirmationController extends GetxController {
       print('❌ No points to add for $routeId');
       return;
     }
+
+    polylines.removeWhere((p) => p.polylineId.value == routeId);
 
     print('🛣️ Adding polyline: $routeId with ${points.length} points');
 
@@ -633,19 +621,10 @@ class DriverConfirmationController extends GetxController {
 
     // Clear existing driver-related polylines
     polylines.removeWhere(
-      (polyline) => polyline.polylineId.value.contains('driver_to_'),
+      (polyline) => polyline.polylineId.value == 'driver_to_pickup',
     );
 
-    // Re-fetch routes based on new position
-    if (currentRide!.status == "ONGOING") {
-      if (currentRide!.arrivalConfirmation == false) {
-        // Driver to Pickup route
-        _fetchAndDrawDriverToPickupRoute();
-      } else {
-        // Driver to Dropoff route
-        _fetchAndDrawDriverToDropoffRoute();
-      }
-    }
+    _fetchAndDrawDriverToPickupRoute();
   }
 
   void _updateCameraPosition(LatLng newPosition) {
@@ -700,7 +679,7 @@ class DriverConfirmationController extends GetxController {
     _addPolylineToMap(
       points,
       'driver_to_pickup',
-      Colors.green,
+      Colors.orange,
       5,
       'Driver to Pickup (Manual)',
     );
@@ -717,7 +696,7 @@ class DriverConfirmationController extends GetxController {
     _addPolylineToMap(
       points,
       'driver_to_dropoff',
-      Colors.orange,
+      Colors.green,
       5,
       'Driver to Dropoff (Manual)',
     );
@@ -734,7 +713,7 @@ class DriverConfirmationController extends GetxController {
     _addPolylineToMap(
       points,
       'pickup_to_destination',
-      Colors.blue,
+      Colors.yellow,
       5,
       'Pickup to Destination (Manual)',
     );
