@@ -354,6 +354,7 @@ class _DriverConfirmationScreenState extends State<DriverConfirmationScreen> {
         children: [
           // Real-time location button
           FloatingActionButton(
+            heroTag: "locationBtn",
             onPressed: () {
               driverConfirmationController.getCurrentLocationManually();
             },
@@ -366,6 +367,7 @@ class _DriverConfirmationScreenState extends State<DriverConfirmationScreen> {
 
           // Refresh routes button
           FloatingActionButton(
+            heroTag: "refreshBtn",
             onPressed: () {
               driverConfirmationController.refreshRoutes();
             },
@@ -378,6 +380,7 @@ class _DriverConfirmationScreenState extends State<DriverConfirmationScreen> {
 
           // Zoom to fit button
           FloatingActionButton(
+            heroTag: "zoomBtn",
             onPressed: () {
               driverConfirmationController.zoomToFitAllPoints();
             },
@@ -393,6 +396,7 @@ class _DriverConfirmationScreenState extends State<DriverConfirmationScreen> {
             final isConnected =
                 driverConfirmationController.channel.value != null;
             return FloatingActionButton(
+              heroTag: "socketBtn",
               onPressed: () {
                 if (isConnected) {
                   driverConfirmationController.disconnectWebSocket();
@@ -428,6 +432,7 @@ class _DriverConfirmationScreenState extends State<DriverConfirmationScreen> {
             final isTracking =
                 driverConfirmationController.isLocationTracking.value;
             return FloatingActionButton(
+              heroTag: "trackingBtn",
               onPressed: () {
                 if (isTracking) {
                   Get.snackbar(

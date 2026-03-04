@@ -27,7 +27,6 @@ class _DriverChatScreenState extends State<DriverChatScreen> {
     chatController = Get.find<DriverChatController>();
     chatController.currentChatId.value = widget.carTransportId;
     _loadUserId();
-    chatController.fetchChats(widget.carTransportId);
 
     ever(chatController.chats, (_) {
       _scrollToBottom();
