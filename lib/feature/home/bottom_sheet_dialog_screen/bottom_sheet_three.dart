@@ -216,16 +216,40 @@ class BottomSheetThree extends StatelessWidget {
                                 icon: const Icon(Icons.call),
                                 label: const Text("Call"),
                                 onPressed: () async {
-                                  final Uri phoneUri = Uri(
-                                    scheme: 'tel',
-                                    path:
-                                        data.vehicle?.driver?.phoneNumber ?? '',
-                                  ); // Handle nullable phoneNumber
-                                  if (await canLaunchUrl(phoneUri)) {
-                                    await launchUrl(phoneUri);
+                                  final phone =
+                                      data.user?.phoneNumber ??
+                                      ''; // make sure this is rider phone
+
+                                  if (phone.isEmpty) {
+                                    Get.snackbar(
+                                      "Error",
+                                      "Phone number not available",
+                                      backgroundColor: Colors.red,
+                                      colorText: Colors.white,
+                                    );
+                                    return;
+                                  }
+
+                                  final formattedPhone = phone
+                                      .replaceAll("+", "")
+                                      .replaceAll(" ", "");
+
+                                  final Uri whatsappUri = Uri.parse(
+                                    "https://wa.me/$formattedPhone",
+                                  );
+
+                                  if (await canLaunchUrl(whatsappUri)) {
+                                    await launchUrl(
+                                      whatsappUri,
+                                      mode: LaunchMode.externalApplication,
+                                    );
                                   } else {
-                                    // Handle error
-                                    print('Could not launch $phoneUri');
+                                    Get.snackbar(
+                                      "Error",
+                                      "WhatsApp is not installed",
+                                      backgroundColor: Colors.red,
+                                      colorText: Colors.white,
+                                    );
                                   }
                                 },
                               ),
@@ -257,6 +281,62 @@ class BottomSheetThree extends StatelessWidget {
                               ),
                             ),
                           ],
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            icon: const Icon(Icons.map),
+                            label: const Text("See Path on Google Maps"),
+                            onPressed: () async {
+                              final driverLat = controller
+                                  .driverRealTimePosition
+                                  .value
+                                  .latitude;
+                              final driverLng = controller
+                                  .driverRealTimePosition
+                                  .value
+                                  .longitude;
+
+                              final destLat =
+                                  controller.destinationPosition.value.latitude;
+                              final destLng = controller
+                                  .destinationPosition
+                                  .value
+                                  .longitude;
+
+                              final Uri googleMapsUri = Uri.parse(
+                                "https://www.google.com/maps/dir/?api=1"
+                                "&origin=$driverLat,$driverLng"
+                                "&destination=$destLat,$destLng"
+                                "&travelmode=driving",
+                              );
+
+                              if (await canLaunchUrl(googleMapsUri)) {
+                                await launchUrl(
+                                  googleMapsUri,
+                                  mode: LaunchMode.externalApplication,
+                                );
+                              } else {
+                                Get.snackbar(
+                                  "Error",
+                                  "Could not open Google Maps",
+                                  backgroundColor: Colors.red,
+                                  colorText: Colors.white,
+                                );
+                              }
+                            },
+                          ),
                         ),
 
                         const SizedBox(height: 12),
