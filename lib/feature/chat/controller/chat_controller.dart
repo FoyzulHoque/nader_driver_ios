@@ -52,7 +52,7 @@ class DriverChatController extends GetxController {
 
     if (token != null && token.isNotEmpty) {
       currentUserId.value = userId ?? '';
-      _connectSocket('ws://brother-taxi.onrender.com', token);
+      _connectSocket(NetworkPath.ws, token);
     } else {
       if (kDebugMode) print("No token found, cannot initialize WebSocket.");
       isLoadingUserList.value = false;
@@ -87,6 +87,14 @@ class DriverChatController extends GetxController {
         _scheduleReconnect();
       },
     );
+
+    webSocketService.isConnected.listen((v) {
+      print("Connected: $v");
+    });
+
+    webSocketService.isAuthenticated.listen((v) {
+      print("Authenticated: $v");
+    });
   }
 
   void _handleMessage(dynamic message) {
@@ -113,7 +121,6 @@ class DriverChatController extends GetxController {
           isLoadingChats.value = false;
           break;
 
-        // ✅ Real-time new message — add immediately without full refetch
         case "Message":
         case "messageSent":
           final msgData = data['data'];
@@ -329,6 +336,8 @@ class DriverChatController extends GetxController {
   void _onSocketClosed() {
     if (kDebugMode) print("WebSocket closed");
     _scheduleReconnect();
+
+    isLoadingChats.value = false;
   }
 
   void _scheduleReconnect() {
@@ -339,6 +348,8 @@ class DriverChatController extends GetxController {
       print(
         "Scheduling reconnect in ${delay.inSeconds}s (attempt $_reconnectAttempt)",
       );
+
+      isLoadingChats.value = false;
     }
     _reconnectTimer = Timer(delay, () async {
       if (_lastSocketUrl != null && _lastToken != null) {

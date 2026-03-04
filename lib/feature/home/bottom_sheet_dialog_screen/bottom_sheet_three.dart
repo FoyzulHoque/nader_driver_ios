@@ -247,8 +247,9 @@ class BottomSheetThree extends StatelessWidget {
                                 icon: const Icon(Icons.chat_bubble_outline),
                                 label: const Text("Chat"),
                                 onPressed: () {
+                                  print("CHAT BUTTON PRESSED");
                                   Get.to(
-                                    DriverChatScreen(
+                                    () => DriverChatScreen(
                                       carTransportId: carTransportId,
                                     ),
                                   );
