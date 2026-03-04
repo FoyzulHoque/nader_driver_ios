@@ -216,10 +216,7 @@ class BottomSheetThree extends StatelessWidget {
                                 icon: const Icon(Icons.call),
                                 label: const Text("Call"),
                                 onPressed: () async {
-                                  final phone =
-                                      data.user?.phoneNumber ??
-                                      ''; // make sure this is rider phone
-
+                                  final phone = data.user?.phoneNumber ?? '';
                                   if (phone.isEmpty) {
                                     Get.snackbar(
                                       "Error",
@@ -230,23 +227,19 @@ class BottomSheetThree extends StatelessWidget {
                                     return;
                                   }
 
-                                  final formattedPhone = phone
-                                      .replaceAll("+", "")
-                                      .replaceAll(" ", "");
-
-                                  final Uri whatsappUri = Uri.parse(
-                                    "https://wa.me/$formattedPhone",
+                                  final whatsappUrl = Uri.parse(
+                                    "https://wa.me/$phone",
                                   );
 
-                                  if (await canLaunchUrl(whatsappUri)) {
+                                  try {
                                     await launchUrl(
-                                      whatsappUri,
+                                      whatsappUrl,
                                       mode: LaunchMode.externalApplication,
                                     );
-                                  } else {
+                                  } catch (e) {
                                     Get.snackbar(
                                       "Error",
-                                      "WhatsApp is not installed",
+                                      "Failed to open WhatsApp: $e",
                                       backgroundColor: Colors.red,
                                       colorText: Colors.white,
                                     );
