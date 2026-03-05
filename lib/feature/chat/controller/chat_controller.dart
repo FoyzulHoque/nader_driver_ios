@@ -1,367 +1,301 @@
-import 'dart:convert';
 import 'dart:async';
-import 'package:flutter/foundation.dart';
+import 'dart:developer';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nader_driver/feature/chat/models/driver_chat_model.dart';
+import 'package:nader_driver/feature/chat/service/chat_service.dart';
 import '../../../core/shared_preference/shared_preferences_helper.dart';
-import '../service/chat_service.dart';
-import '../../../../core/network_caller/endpoints.dart';
 
 class DriverChatController extends GetxController {
-  final WebSocketService webSocketService = WebSocketService();
-  final ImagePicker _imagePicker = ImagePicker();
+  final DriverChatService _service = DriverChatService();
 
-  var usersWithLastMessages = <dynamic>[].obs;
-  var chats = <dynamic>[].obs;
-  var isLoadingChats = true.obs;
-  var isUploadingImage = false.obs;
-  var selectedImagePath = "".obs;
-  var isOptionsVisible = false.obs;
-  var isLoadingUserList = true.obs;
-  var currentUserId = ''.obs;
-  var currentChatId = ''.obs;
-  var isPeerTyping = false.obs;
+  // ── Single, persistent subscription ───────────────────────────────────────
+  // Created once in onInit() and kept alive for the controller's lifetime.
+  // NEVER cancelled between screen navigations — that is the critical fix.
+  StreamSubscription<Map<String, dynamic>>? _subscription;
 
-  String? _lastSocketUrl;
-  String? _lastToken;
-  Timer? _reconnectTimer;
-  int _reconnectAttempt = 0;
+  // ── Reactive state ─────────────────────────────────────────────────────────
+  final chats = <Map<String, dynamic>>[].obs;
+  final isConnected = false.obs;
+  final isLoadingChats = false.obs;
+  final isPeerTyping = false.obs;
+  final currentChatId = ''.obs; // carTransportId — set by screen
+  final chatId = ''.obs; // server chatId from joinedChat
+  final participants = Rx<ChatParticipants?>(null);
 
-  DateTime? _lastTypingSentAt;
-  Timer? _typingResetTimer;
+  // ── Internal ───────────────────────────────────────────────────────────────
+  bool _authenticated = false;
+  Timer? _pollTimer;
+
+  // Tracks confirmed message IDs — prevents duplicates and stops
+  // the Messages response from wiping real-time newMessage events.
+  final Set<String> _messageIds = {};
+
+  // ── Lifecycle ──────────────────────────────────────────────────────────────
 
   @override
-  void onInit() async {
-    await _initializeSocketConnection();
+  void onInit() {
     super.onInit();
+    // Subscribe once here. The service's broadcast stream stays alive
+    // across connect()/close() cycles, so this subscription always works.
+    _subscription = _service.messageStream.listen(
+      _handleEvent,
+      onError: (e) {
+        log('[DriverChatController] stream error: $e');
+        isConnected.value = false;
+        isLoadingChats.value = false;
+      },
+    );
   }
 
   @override
   void onClose() {
-    webSocketService.close();
-    _reconnectTimer?.cancel();
-    _typingResetTimer?.cancel();
+    _pollTimer?.cancel();
+    _subscription?.cancel();
+    _service.dispose();
     super.onClose();
   }
 
-  Future<void> _initializeSocketConnection() async {
-    final token = await SharedPreferencesHelper.getAccessToken();
-    final userId = await SharedPreferencesHelper.getUserId();
+  // ── Public API ─────────────────────────────────────────────────────────────
 
-    if (token != null && token.isNotEmpty) {
-      currentUserId.value = userId ?? '';
-      _connectSocket(NetworkPath.ws, token);
-    } else {
-      if (kDebugMode) print("No token found, cannot initialize WebSocket.");
-      isLoadingUserList.value = false;
-    }
-  }
-
-  void _connectSocket(String url, String token) {
-    _lastSocketUrl = url;
-    _lastToken = token;
-
-    webSocketService.connect(url, token);
-
-    webSocketService.messages.listen(
-      (raw) {
-        final data = jsonDecode(raw);
-
-        if (data['event'] == 'authenticated') {
-          if (kDebugMode) print("Driver socket authenticated");
-
-          fetchUserList();
-
-          if (currentChatId.value.isNotEmpty) {
-            fetchChats(currentChatId.value);
-          }
-        }
-
-        _handleMessage(raw);
-      },
-      onDone: _onSocketClosed,
-      onError: (error, stack) {
-        if (kDebugMode) print("WebSocket error: $error");
-        _scheduleReconnect();
-      },
-    );
-
-    webSocketService.isConnected.listen((v) {
-      print("Connected: $v");
-    });
-
-    webSocketService.isAuthenticated.listen((v) {
-      print("Authenticated: $v");
-    });
-  }
-
-  void _handleMessage(dynamic message) {
-    if (kDebugMode) print("Received WebSocket message: $message");
-
-    try {
-      final data = jsonDecode(message);
-
-      switch (data['event']) {
-        case "messageList":
-          usersWithLastMessages.value = data['data'] ?? [];
-          _sortUsersByLastMessage();
-          isLoadingUserList.value = false;
-          break;
-
-        case "Messages":
-          chats.value = data['data']?['messages'] ?? [];
-          isLoadingChats.value = false;
-          break;
-
-        case "joinedChat":
-          final joinedData = data['data'];
-          chats.value = joinedData['messages'] ?? [];
-          isLoadingChats.value = false;
-          break;
-
-        case "Message":
-        case "messageSent":
-          final msgData = data['data'];
-          if (msgData != null) {
-            final incomingChatId = msgData['carTransportId']?.toString() ?? '';
-
-            // ✅ Only add if it belongs to the current open chat
-            if (incomingChatId == currentChatId.value) {
-              // Avoid duplicates by checking id
-              if (!chats.any((c) => c['id'] == msgData['id'])) {
-                chats.add(msgData);
-                chats.refresh(); // ✅ Triggers Obx rebuild
-              }
-            }
-
-            // Always update the user list preview
-            _updateUserListPreview(
-              msgData['carTransportId']?.toString() ?? '',
-              msgData,
-            );
-          }
-          break;
-
-        case "typing":
-          _handleTypingEvent(data['data']);
-          break;
-
-        case "typingStopped":
-          isPeerTyping.value = false;
-          break;
-
-        default:
-          if (kDebugMode) print("Unknown event type: ${data['event']}");
+  /// Called by DriverChatScreen each time it opens.
+  Future<void> connectForChat() async {
+    if (_service.isConnected && _authenticated) {
+      // Already authenticated — just re-join to pull latest history.
+      // Real-time messages received while the screen was closed are still
+      // in [chats] and will be merged, not overwritten.
+      if (currentChatId.value.isNotEmpty) {
+        isLoadingChats.value = true;
+        _doJoinAndFetch(currentChatId.value);
       }
-    } catch (e) {
-      if (kDebugMode) print("Error parsing WebSocket message: $e");
-    }
-  }
-
-  void _updateUserListPreview(
-    String carTransportId,
-    Map<String, dynamic> msgData,
-  ) {
-    final index = usersWithLastMessages.indexWhere(
-      (u) => u['carTransportId'] == carTransportId,
-    );
-
-    if (index != -1) {
-      usersWithLastMessages[index]['lastMessage'] = msgData;
-    } else {
-      usersWithLastMessages.insert(0, {
-        'carTransportId': carTransportId,
-        'user': {
-          'id': msgData['receiverId'] ?? '',
-          'name': '',
-          'photos': {'url': ''},
-        },
-        'lastMessage': msgData,
-      });
-    }
-
-    _sortUsersByLastMessage();
-    usersWithLastMessages.refresh();
-  }
-
-  void _sortUsersByLastMessage() {
-    usersWithLastMessages.sort((a, b) {
-      final aTime =
-          DateTime.tryParse(a['lastMessage']?['createdAt'] ?? '') ??
-          DateTime(1970);
-      final bTime =
-          DateTime.tryParse(b['lastMessage']?['createdAt'] ?? '') ??
-          DateTime(1970);
-      return bTime.compareTo(aTime);
-    });
-  }
-
-  Future<void> fetchUserList() async {
-    isLoadingUserList.value = true;
-    webSocketService.sendMessage("messageList", {});
-  }
-
-  Future<void> fetchChats(String carTransportId) async {
-    if (!webSocketService.isAuthenticated.value) {
-      if (kDebugMode) print("Not authenticated yet. Waiting...");
       return;
     }
 
+    final token = await SharedPreferencesHelper.getAccessToken();
+    if (token == null) return;
+
+    const wsUrl = 'ws://72.61.163.212:5006';
     isLoadingChats.value = true;
-    currentChatId.value = carTransportId;
-    webSocketService.sendMessage("joinChat", {
-      "carTransportId": carTransportId,
-    });
+
+    _clearAll();
+    _authenticated = false;
+    _service.connect(wsUrl, token);
+    isConnected.value = _service.isConnected;
   }
 
-  void sendMessage(
-    String carTransportId,
-    String message, {
-    List<String>? images,
-  }) {
-    // ✅ Optimistically add message to UI immediately
+  /// Call from the chat screen's initState / onResume to start auto-refresh.
+  void startPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      if (_authenticated && currentChatId.value.isNotEmpty) {
+        _service.fetchMessages(currentChatId.value);
+      }
+    });
+    log('[DriverChatController] Polling started');
+  }
+
+  /// Call from the chat screen's dispose / onPause to stop auto-refresh.
+  void stopPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = null;
+    log('[DriverChatController] Polling stopped');
+  }
+
+  /// Send a plain-text message to the rider.
+  void sendMessage(String carTransportId, String text) {
+    if (text.trim().isEmpty) return;
+
+    final tempId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
     final tempMsg = {
-      'id': 'temp_${DateTime.now().millisecondsSinceEpoch}',
-      'carTransportId': carTransportId,
-      'message': message,
-      'senderId': currentUserId.value,
+      'id': tempId,
+      'message': text,
       'isSender': true,
-      'createdAt': DateTime.now().toIso8601String(),
       'isTemp': true,
+      'status': 'sending',
+      'createdAt': DateTime.now().toIso8601String(),
+      'images': <String>[],
     };
     chats.add(tempMsg);
     chats.refresh();
-
-    // Then send via WebSocket
-    webSocketService.sendMessage("Message", {
-      "carTransportId": carTransportId,
-      "message": message,
-      "images": images ?? [],
-    });
-
-    _sendTypingStopped(carTransportId);
+    _service.sendMessage(carTransportId, text);
   }
 
-  Future<void> pickImage() async {
-    try {
-      final image = await _imagePicker.pickImage(source: ImageSource.gallery);
-      if (image != null) {
-        selectedImagePath.value = image.path;
-      }
-    } catch (e) {
-      if (kDebugMode) print("Error selecting image: $e");
+  /// Send a message with image URLs.
+  void sendWithImages(
+    String carTransportId,
+    String text,
+    List<String> imageUrls,
+  ) {
+    _service.sendMessage(carTransportId, text, images: imageUrls);
+  }
+
+  /// Typing indicator stub — wire up when server supports it.
+  void userTyping(String carTransportId) {}
+
+  // ── Private ────────────────────────────────────────────────────────────────
+
+  void _clearAll() {
+    chats.clear();
+    _messageIds.clear();
+  }
+
+  void _handleEvent(Map<String, dynamic> data) {
+    final event = data['event'] as String? ?? '';
+    log('[DriverChatController] event: $event');
+
+    switch (event) {
+      // ── Internal socket lifecycle events from the service ─────────────────
+      case '__socketError':
+      case '__socketClosed':
+        isConnected.value = false;
+        isLoadingChats.value = false;
+        _authenticated = false;
+        break;
+
+      case 'authenticated':
+        _authenticated = true;
+        isConnected.value = true;
+        log('[DriverChatController] Authenticated as DRIVER');
+        if (currentChatId.value.isNotEmpty) {
+          _doJoinAndFetch(currentChatId.value);
+        }
+        break;
+
+      case 'joinedChat':
+        final d = data['data'] as Map<String, dynamic>? ?? {};
+        final joined = JoinedChatResponse.fromJson(d);
+        chatId.value = joined.chatId;
+        if (joined.carTransportId.isNotEmpty) {
+          currentChatId.value = joined.carTransportId;
+        }
+        participants.value = joined.participants;
+        log('[DriverChatController] Joined chat: ${chatId.value}');
+        _service.fetchMessages(currentChatId.value);
+        startPolling(); // auto-refresh every 3 s
+        break;
+
+      // Merge server history — never replace the whole list.
+      // Any newMessage events received while the screen was closed
+      // are already in [chats] and must not be wiped out.
+      case 'Messages':
+        final d = data['data'] as Map<String, dynamic>? ?? {};
+        final fetched = FetchMessagesResponse.fromJson(d);
+        participants.value = fetched.participants;
+        _mergeFromServer(fetched.messages);
+        isLoadingChats.value = false;
+        log('[DriverChatController] Merged. Total: ${chats.length}');
+        break;
+
+      // Real-time message from the rider — append immediately.
+      case 'newMessage':
+        final d = data['data'] as Map<String, dynamic>? ?? {};
+        final incoming = ChatMessage.fromJson({...d, 'isSender': false});
+        _appendOrSkipDuplicate(incoming.toMap());
+        log('[DriverChatController] ⚡ newMessage: ${incoming.message}');
+        break;
+
+      // Driver's own message confirmed by server.
+      case 'messageSent':
+        final d = data['data'] as Map<String, dynamic>? ?? {};
+        final sent = ChatMessage.fromJson({...d, 'isSender': true});
+        _confirmOrAppend(sent);
+        log('[DriverChatController] messageSent confirmed: ${sent.message}');
+        break;
+
+      default:
+        log('[DriverChatController] Unhandled event: $event');
     }
   }
 
-  Future<void> uploadImage(String carTransportId, String message) async {
-    if (selectedImagePath.value.isEmpty) return;
-    isUploadingImage.value = true;
-
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token');
-      if (token == null) return;
-
-      final imageUrl = await _uploadImageToServer(token);
-      if (imageUrl != null) {
-        sendMessage(carTransportId, message, images: [imageUrl]);
-        selectedImagePath.value = "";
-      }
-    } catch (e) {
-      if (kDebugMode) print("Error uploading image: $e");
-    } finally {
-      isUploadingImage.value = false;
-    }
+  void _doJoinAndFetch(String ctId) {
+    currentChatId.value = ctId;
+    // Do NOT clear chats — keep real-time messages received while away.
+    _service.joinChat(ctId);
   }
 
-  Future<String?> _uploadImageToServer(String token) async {
-    final uri = Uri.parse('${Urls.baseUrl}/chats/upload-images');
-    final request = http.MultipartRequest('POST', uri)
-      ..headers['Authorization'] = token;
+  /// Merges server history into the current list without removing
+  /// real-time messages that already arrived.
+  void _mergeFromServer(List<ChatMessage> serverMessages) {
+    bool changed = false;
 
-    final file = await http.MultipartFile.fromPath(
-      'images',
-      selectedImagePath.value,
-    );
-    request.files.add(file);
+    for (final serverMsg in serverMessages) {
+      final id = serverMsg.id;
+      if (_messageIds.contains(id)) continue; // already in list
 
-    final response = await request.send();
-    if (response.statusCode == 200) {
-      final responseBody = await response.stream.bytesToString();
-      final responseJson = jsonDecode(responseBody);
-      return responseJson['data'][0];
-    }
-    return null;
-  }
+      final map = serverMsg.toMap();
 
-  void userTyping(String carTransportId) {
-    final now = DateTime.now();
-    if (_lastTypingSentAt == null ||
-        now.difference(_lastTypingSentAt!).inMilliseconds > 800) {
-      _lastTypingSentAt = now;
-      webSocketService.sendMessage("typing", {
-        "carTransportId": carTransportId,
-      });
-    }
-    _typingResetTimer?.cancel();
-    _typingResetTimer = Timer(
-      const Duration(seconds: 3),
-      () => _sendTypingStopped(carTransportId),
-    );
-  }
-
-  void _sendTypingStopped(String carTransportId) {
-    webSocketService.sendMessage("typingStopped", {
-      "carTransportId": carTransportId,
-    });
-  }
-
-  void _handleTypingEvent(dynamic payload) {
-    if (payload == null) return;
-    final carTransportId = payload['carTransportId'] as String? ?? '';
-    final senderId = payload['senderId'] as String? ?? '';
-    if (carTransportId.isEmpty || senderId.isEmpty) return;
-    if (carTransportId != currentChatId.value) return;
-    if (senderId == currentUserId.value) return;
-
-    isPeerTyping.value = true;
-    _typingResetTimer?.cancel();
-    _typingResetTimer = Timer(const Duration(seconds: 3), () {
-      isPeerTyping.value = false;
-    });
-  }
-
-  void _onSocketClosed() {
-    if (kDebugMode) print("WebSocket closed");
-    _scheduleReconnect();
-
-    isLoadingChats.value = false;
-  }
-
-  void _scheduleReconnect() {
-    if (_reconnectTimer?.isActive == true) return;
-    _reconnectAttempt += 1;
-    final delay = Duration(seconds: _backoffSeconds(_reconnectAttempt));
-    if (kDebugMode) {
-      print(
-        "Scheduling reconnect in ${delay.inSeconds}s (attempt $_reconnectAttempt)",
+      // Replace a matching temp optimistic bubble
+      final tempIndex = chats.indexWhere(
+        (m) =>
+            m['isTemp'] == true &&
+            m['message'] == serverMsg.message &&
+            m['isSender'] == true,
       );
 
-      isLoadingChats.value = false;
-    }
-    _reconnectTimer = Timer(delay, () async {
-      if (_lastSocketUrl != null && _lastToken != null) {
-        _connectSocket(_lastSocketUrl!, _lastToken!);
+      if (tempIndex != -1) {
+        chats[tempIndex] = map;
       } else {
-        await _initializeSocketConnection();
+        final insertIdx = _findInsertIndex(serverMsg.createdAt);
+        chats.insert(insertIdx, map);
       }
-    });
+
+      _messageIds.add(id);
+      changed = true;
+    }
+
+    if (changed) chats.refresh();
   }
 
-  int _backoffSeconds(int attempt) {
-    final v = 1 << (attempt - 1);
-    return v > 16 ? 16 : v;
+  /// Returns the index where a message with [createdAt] should be inserted
+  /// to keep the list sorted oldest-first.
+  int _findInsertIndex(String? createdAt) {
+    if (createdAt == null) return chats.length;
+    final dt = DateTime.tryParse(createdAt);
+    if (dt == null) return chats.length;
+
+    for (int i = 0; i < chats.length; i++) {
+      final existing = DateTime.tryParse(
+        chats[i]['createdAt'] as String? ?? '',
+      );
+      if (existing != null && existing.isAfter(dt)) return i;
+    }
+    return chats.length;
+  }
+
+  /// Replaces the temp optimistic bubble when messageSent arrives.
+  void _confirmOrAppend(ChatMessage confirmed) {
+    final id = confirmed.id;
+    if (_messageIds.contains(id)) return;
+
+    final tempIndex = chats.indexWhere(
+      (m) =>
+          m['isTemp'] == true &&
+          m['message'] == confirmed.message &&
+          m['isSender'] == true,
+    );
+
+    final confirmedMap = {
+      ...confirmed.toMap(),
+      'status': 'sent',
+      'isTemp': false,
+    };
+
+    if (tempIndex != -1) {
+      chats[tempIndex] = confirmedMap;
+    } else {
+      chats.add(confirmedMap);
+    }
+
+    _messageIds.add(id);
+    chats.refresh();
+  }
+
+  /// Appends an incoming message, skipping duplicates.
+  void _appendOrSkipDuplicate(Map<String, dynamic> incoming) {
+    final id = incoming['id'] as String?;
+    if (id != null && _messageIds.contains(id)) return;
+
+    chats.add(incoming);
+    if (id != null) _messageIds.add(id);
+    chats.refresh();
   }
 }

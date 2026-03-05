@@ -3,6 +3,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:nader_driver/feature/chat/service/chat_service.dart';
 import 'package:nader_driver/in_app_notification.dart'
     show InAppNotificationController;
 import 'package:nader_driver/route/route.dart';
@@ -19,6 +20,8 @@ void main() async {
   configEasyLoading();
 
   // Initialize controllers
+  print("main.dart: Putting WebSocketService");
+  Get.put(DriverChatService());
   Get.put(InAppNotificationController());
   Get.put(OnlineRideController());
   Get.put(RiderInfoApiController());
