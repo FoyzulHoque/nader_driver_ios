@@ -1,82 +1,134 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:get/get.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-class WebSocketService {
+class DriverChatService {
   WebSocketChannel? _channel;
-  StreamSubscription? _subscription;
+  StreamSubscription? _channelSub;
 
-  final StreamController<String> _messageController =
-      StreamController<String>.broadcast();
+  // Single broadcast controller that lives for the lifetime of the service.
+  // It is NEVER closed between reconnections — only on dispose().
+  final _messageStreamController =
+      StreamController<Map<String, dynamic>>.broadcast();
 
-  final isConnected = false.obs;
+  bool _isConnected = false;
 
-  final isAuthenticated = false.obs;
+  bool get isConnected => _isConnected && _channel != null;
 
-  Stream<String> get messages => _messageController.stream;
+  Stream<Map<String, dynamic>> get messageStream =>
+      _messageStreamController.stream;
 
+  /// Opens a WebSocket connection and pipes every message into [messageStream].
+  /// Safe to call multiple times — tears down the old socket first.
   void connect(String url, String token) {
+    // ── Tear down any existing socket ──────────────────────────────────────
+    _channelSub?.cancel();
+    _channelSub = null;
+    _channel?.sink.close();
+    _channel = null;
+    _isConnected = false;
+
+    // ── Open new socket ────────────────────────────────────────────────────
     try {
       _channel = WebSocketChannel.connect(Uri.parse(url));
-      isConnected.value = true;
+      _isConnected = true;
 
-      _subscription?.cancel();
-      _subscription = _channel!.stream.listen(
-        (message) {
-          _handleIncoming(message);
-          _messageController.add(message);
-        },
-        onDone: () {
-          if (kDebugMode) print("WebSocket closed.");
-          isConnected.value = false;
-          isAuthenticated.value = false;
+      // Pipe raw WebSocket frames into the shared broadcast stream.
+      // The controller subscription keeps working across screen navigations.
+      _channelSub = _channel!.stream.listen(
+        (raw) {
+          if (_messageStreamController.isClosed) return;
+          try {
+            final data = jsonDecode(raw as String) as Map<String, dynamic>;
+            if (kDebugMode) print('[DriverChatService] ← $data');
+            _messageStreamController.add(data);
+          } catch (e) {
+            if (kDebugMode) print('[DriverChatService] JSON decode error: $e');
+          }
         },
         onError: (error) {
-          if (kDebugMode) print("WebSocket error: $error");
-          isConnected.value = false;
-          isAuthenticated.value = false;
+          if (kDebugMode) print('[DriverChatService] Stream error: $error');
+          _isConnected = false;
+          if (!_messageStreamController.isClosed) {
+            _messageStreamController.add({
+              'event': '__socketError',
+              'error': error.toString(),
+            });
+          }
         },
+        onDone: () {
+          if (kDebugMode) print('[DriverChatService] Connection closed');
+          _isConnected = false;
+          if (!_messageStreamController.isClosed) {
+            _messageStreamController.add({'event': '__socketClosed'});
+          }
+        },
+        cancelOnError: false,
       );
 
-      _authenticate(token);
+      _sendRaw({"event": "authenticate", "token": token});
     } catch (e) {
-      if (kDebugMode) print("WebSocket connection failed: $e");
-      isConnected.value = false;
+      if (kDebugMode) print('[DriverChatService] Connection error: $e');
+      _isConnected = false;
     }
   }
 
-  void _authenticate(String token) {
-    final authMessage = jsonEncode({"event": "authenticate", "token": token});
-    _channel?.sink.add(authMessage);
-    if (kDebugMode) print("Sent auth: $authMessage");
+  void joinChat(String carTransportId) {
+    _sendRaw({"event": "joinChat", "carTransportId": carTransportId});
   }
 
-  void _handleIncoming(dynamic message) {
-    try {
-      final data = jsonDecode(message);
-      if (data['event'] == 'authenticated') {
-        if (kDebugMode) print("WebSocket authenticated.");
-        isAuthenticated.value = true;
+  void fetchMessages(String carTransportId) {
+    _sendRaw({"event": "fetchMessages", "carTransportId": carTransportId});
+  }
+
+  void sendMessage(
+    String carTransportId,
+    String message, {
+    List<String> images = const [],
+  }) {
+    _sendRaw({
+      "event": "Message",
+      "carTransportId": carTransportId,
+      "message": message,
+      if (images.isNotEmpty) "images": images,
+    });
+  }
+
+  void _sendRaw(Map<String, dynamic> payload) {
+    if (!isConnected) {
+      if (kDebugMode) {
+        print('[DriverChatService] Not connected. Cannot send: $payload');
       }
-    } catch (_) {}
-  }
-
-  void sendMessage(String event, Map<String, dynamic> data) {
-    if (!isConnected.value) {
-      if (kDebugMode) print("Cannot send. Socket not connected.");
       return;
     }
-    final message = jsonEncode({"event": event, ...data});
-    _channel?.sink.add(message);
-    if (kDebugMode) print("Sent: $message");
+    try {
+      final encoded = jsonEncode(payload);
+      _channel!.sink.add(encoded);
+      if (kDebugMode) print('[DriverChatService] → $encoded');
+    } catch (e) {
+      if (kDebugMode) print('[DriverChatService] Send error: $e');
+    }
   }
 
+  /// Closes only the WebSocket, leaving [messageStream] open.
+  /// The controller can reconnect by calling [connect] again.
   void close() {
-    isConnected.value = false;
-    isAuthenticated.value = false;
-    _subscription?.cancel();
+    _channelSub?.cancel();
+    _channelSub = null;
     _channel?.sink.close();
+    _channel = null;
+    _isConnected = false;
+    if (kDebugMode) print('[DriverChatService] Socket closed');
+  }
+
+  /// Closes everything including the broadcast stream. Call only when the
+  /// service is being permanently discarded (controller onClose).
+  void dispose() {
+    close();
+    if (!_messageStreamController.isClosed) {
+      _messageStreamController.close();
+    }
+    if (kDebugMode) print('[DriverChatService] Disposed');
   }
 }

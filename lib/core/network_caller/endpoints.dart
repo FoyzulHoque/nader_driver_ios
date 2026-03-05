@@ -1,6 +1,6 @@
 class NetworkPath {
   static const String _baseUrl = 'http://72.61.163.212:5006/api/v1';
-  static const String ws = 'wss://72.61.163.212:5006';
+  static const String ws = 'ws://72.61.163.212:5006';
   static const String registration = '$_baseUrl/users/create-user/register';
   static const String verifyLogin = '$_baseUrl/auth/verify-login';
   static const String resendOtp = '$_baseUrl/auth/resend-otp';
